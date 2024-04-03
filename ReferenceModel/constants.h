@@ -1,0 +1,1 @@
+#define COMPRESSED_IN_WIDTH 8
