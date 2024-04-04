@@ -25,9 +25,11 @@ SC_MODULE(Reporter) {
         while(true){
             wait(clk->posedge_event());
             wait(SC_ZERO_TIME);
+            
 
             std::cout << "Time : " << sc_time_stamp() << std::endl\
                 << "compressed out  : ";
+            
             for (int  i = COMPRESSED_IN_WIDTH-1; i > -1; i--)
                 std::cout << compressed_out[i] -> read();
 
@@ -40,6 +42,12 @@ SC_MODULE(Reporter) {
 
             for (int i = 1; i > -1; i--)
                 std::cout << response[i] -> read();
+            
+            std::cout << std::endl << "Data_in  : ";
+
+            for (int i = 79; i > -1; i--)
+                
+                std::cout << data_in[i] -> read();
             
             std::cout << std::endl << std::endl  << "####################################################" << std::endl << std::endl;
 
