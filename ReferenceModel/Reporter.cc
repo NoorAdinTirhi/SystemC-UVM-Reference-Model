@@ -51,13 +51,14 @@ SC_MODULE(Reporter) {
             for (int i = 79; i > -1; i--)
                 
                 std::cout << data_in[i] -> read();
-     
-  
-           
-            
-            std::cout << std::endl << std::endl  << "####################################################" << std::endl << std::endl;
 
 
+            std::cout << std::endl << "compressed_in  : ";
+
+            for (int i = COMPRESSED_IN_WIDTH; i > -1; i--)
+                std::cout << compressed_in[i]->read();
+
+            std::cout<< std::endl<< std::endl<< "####################################################" << std::endl<< std::endl;
         }
     }
 
