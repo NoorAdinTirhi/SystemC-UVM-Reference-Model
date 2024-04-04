@@ -27,8 +27,11 @@ SC_MODULE(Reporter) {
             wait(SC_ZERO_TIME);
             
 
+            
+
             std::cout << "Time : " << sc_time_stamp() << std::endl\
                 << "compressed out  : ";
+            
             
             for (int  i = COMPRESSED_IN_WIDTH-1; i > -1; i--)
                 std::cout << compressed_out[i] -> read();
