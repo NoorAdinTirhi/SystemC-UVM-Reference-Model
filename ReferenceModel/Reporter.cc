@@ -3,6 +3,14 @@ using namespace sc_core;
 SC_MODULE(Reporter) {
     sc_port<sc_signal_in_if<bool>> clk;
 
+    sc_port<sc_signal_in_if<bool>> reset;
+
+    sc_port<sc_signal_in_if<bool>, 2, SC_ALL_BOUND> command; 
+
+    sc_port<sc_signal_in_if<bool>, 80, SC_ALL_BOUND> data_in;
+
+    sc_port<sc_signal_in_if<bool>, COMPRESSED_IN_WIDTH, SC_ALL_BOUND> compressed_in;
+
     sc_port<sc_signal_in_if<bool>, COMPRESSED_IN_WIDTH, SC_ALL_BOUND> compressed_out;
 
     sc_port<sc_signal_in_if<bool>, 80, SC_ALL_BOUND> decompressed_out;

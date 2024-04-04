@@ -42,7 +42,7 @@ SC_MODULE(Compressor){
 
     //index buffer
 
-    sc_buffer<int> index_buffer;
+    int index_buffer;
 
     std::vector <std::vector<bool>> table;
     
@@ -57,6 +57,12 @@ SC_MODULE(Compressor){
         
         bool search_flag = false;
 
+
+        std::vector<bool> temp;
+
+        int x = 0;
+
+
         int sum = 0;
         for(int i = 0; i < std::pow(2, COMPRESSED_IN_WIDTH); i++){
             table[i].reserve(80);
@@ -64,7 +70,7 @@ SC_MODULE(Compressor){
                 table[i][j] = false;
             }
         }
-        index_buffer.write(0);
+        index_buffer = 0;
         for (int i = 0; i < 2; i++){
             response[i]->write(false);
         }
@@ -78,7 +84,7 @@ SC_MODULE(Compressor){
                         table[i][j] = false;
                     }
                 }
-                index_buffer.write(0);
+                index_buffer = 0;
 
                 for (int i = 0; i < 2; i++){
                     response[i]->write(false);
@@ -86,8 +92,9 @@ SC_MODULE(Compressor){
                 continue;
             }
 
-            if(index_buffer.read() >= std::pow(2, COMPRESSED_IN_WIDTH)){
+            if(index_buffer >= std::pow(2, COMPRESSED_IN_WIDTH) - 1){
                 //ERROR
+                std::cout << "ERROR : MEMORY FULL" << std::endl;
                 response[0] -> write(1);
                 response[0] -> write(1);
                 continue;
@@ -95,7 +102,7 @@ SC_MODULE(Compressor){
 
             if (command[0]->read() == 1 && command[1]->read() == 1){
                 //ERROR
-                std::cout << "ERROR" << std::endl;
+                std::cout << "ERROR : COMMAND is 11" << std::endl;
                 response[0]->write(1);
                 response[1]->write(1);
                 continue;
@@ -109,6 +116,7 @@ SC_MODULE(Compressor){
                 continue;
             }
 
+
             if (command[0]->read() == 1 && command[1]->read() == 0){
                 //DECOMPRESSION
                 std::cout << "DECOMPRESSION : ";
@@ -119,11 +127,11 @@ SC_MODULE(Compressor){
                 for (int i = 0; i < COMPRESSED_IN_WIDTH; i++){
                     sum += (compressed_in[i] -> read()) ? std::pow(2,i) : 0;
                 }
-                if (sum < index_buffer.read() ){
+                if (sum < index_buffer ){
                     // VALID DECOMPRESSION
                     std::cout << "VALID" << std::endl;
                     for (int j = 0; j < 80; j++){
-                        decompressed_out[j] -> write(table[boolArrtoInt(compressed_in)][j]);
+                        decompressed_out[j] -> write(table[sum][j]);
                     }
                     response[0] -> write(1);
                     response[1] -> write(0);
@@ -136,10 +144,16 @@ SC_MODULE(Compressor){
                 
             else if (command[0]->read() == 0 && command[1]->read() == 1){
                 //COMPRESSION
-                std::cout << "COMPRESSION VALID " << std::endl;
-                std::vector<bool> temp;
+                std::cout << "COMPRESSION VALID ";
+
+                response[0] -> write(0);
+                response[1] -> write(1);
+
+
+                temp.reserve(32);
                 search_flag = false;
-                for(int i = 0; i < index_buffer.read(); i++){
+                for(int i = 0; i <= index_buffer; i++){
+
                     for (int j = 0; j < 80; j++){
                         if (table[i][j] != data_in[j]->read())
                             break;
@@ -148,20 +162,26 @@ SC_MODULE(Compressor){
                             search_flag = true;
                         }
                     }
+                    std::cout << " FOUND :  " << search_flag << " on iteration : " << i << std::endl;
+
+                    std::cout << "INDEX BUFFER : " << index_buffer << std::endl; 
+
                     if (search_flag){
-                        temp = intToBoolArr(i);
+                    for (int j = 0; j < 32; j++)
+                        temp[i] = ( ( (1<<j) & i )>>i == 1 );
                     }else{
-                        temp = intToBoolArr(index_buffer.read() + 1);
+                        x = index_buffer + 1;
+
+                        for (int j = 0; j < 32; j++)
+                            temp[i] = ( ( (1<<j) & x )>>i == 1 );
+
                         for(int j = 0; j < 80; j++)
-                            table[index_buffer.read() + 1][j] = data_in[j]->read();
-                        index_buffer.write(index_buffer.read() + 1);
+                            table[x][j] = data_in[j]->read();
                         
+                        index_buffer = x; 
                     }
                     for (int j = 0; j < COMPRESSED_IN_WIDTH; j ++ )
                         compressed_out[j]->write(temp[j]);
-                    
-                    response[0] -> write(0);
-                    response[1] -> write(1);
                     break;   
                 }
             }
@@ -173,7 +193,7 @@ SC_MODULE(Compressor){
 int sc_main(int, char *[]){
 
     //initialize random seed
-    srand(5);
+    srand(10);
     
     //compressor inputs
     sc_signal<bool> clk;
@@ -202,17 +222,20 @@ int sc_main(int, char *[]){
 
     D1.reset(reset);
     C1.reset(reset);
+    R1.reset(reset);
     
     for(int i = 0; i < 2; i++){
         D1.command(command[i]);
         C1.command(command[i]);
         C1.response(response[i]);
         R1.response(response[i]);
+        R1.command(response[i]);
     }
         
     for(int i = 0; i < 80; i++){
         D1.data_in(data_in[i]);
         C1.data_in(data_in[i]);
+        R1.data_in(data_in[i]);
         C1.decompressed_out(decompressed_out[i]);
         R1.decompressed_out(decompressed_out[i]);
     }
@@ -220,6 +243,7 @@ int sc_main(int, char *[]){
     for(int i = 0; i < COMPRESSED_IN_WIDTH; i ++){
         D1.compressed_in(compressed_in[i]);
         C1.compressed_in(compressed_in[i]);
+        R1.compressed_in(compressed_in[i]);
         C1.compressed_out(compressed_out[i]);
         R1.compressed_out(compressed_out[i]);
     }
@@ -241,7 +265,7 @@ int sc_main(int, char *[]){
     
   
     
-    sc_start(1000, SC_NS);
+    sc_start(100000, SC_NS);
     sc_close_vcd_trace_file(file); // close trace file
     return 0;
 }

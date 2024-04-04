@@ -11,12 +11,12 @@ SC_MODULE(Driver) {
 
     SC_CTOR(Driver) {
         SC_THREAD(drive);
+        SC_THREAD(scheduelReset);
     }
 
     void drive(){
         while(true){
             clk->write(false);
-            reset->write(false);
             for (int i = 0; i < 2; i++){
                 command[i]->write(rand()%2 == 0) ;
             }
@@ -33,6 +33,23 @@ SC_MODULE(Driver) {
 
         }
     }
+    void scheduelReset(){
+        int i = 1;
+        reset->write(false);
+        while (true)
+        {
+            std::cout << "TIME FRACTION : " << abs((sc_time_stamp() - sc_time(11000, SC_NS)* i)/sc_time(11000, SC_NS))  << std::endl;
+            if (abs((sc_time_stamp() - sc_time(11000, SC_NS)* i)/sc_time(11000, SC_NS)) < 0.1 ){
+                reset->write(true);
+                i++;
+            }else{
+                reset->write(false);
+            }
+            wait(10, SC_NS);
+        }
+        
+    }
+
 
 
 };
