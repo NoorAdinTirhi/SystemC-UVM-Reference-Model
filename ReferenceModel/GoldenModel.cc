@@ -96,7 +96,7 @@ SC_MODULE(Compressor){
                 //ERROR
                 std::cout << "ERROR : MEMORY FULL" << std::endl;
                 response[0] -> write(1);
-                response[0] -> write(1);
+                response[1] -> write(1);
                 continue;
             }
 
