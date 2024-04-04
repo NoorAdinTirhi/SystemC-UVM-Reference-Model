@@ -57,6 +57,7 @@ SC_MODULE(Reporter) {
 
             for (int i = COMPRESSED_IN_WIDTH; i > -1; i--)
                 std::cout << compressed_in[i]->read();
+                //HELPEPLA{PSDL{ASKDAPIOSHJDOAHSDIPUASHGBDPI}}
 
             std::cout<< std::endl<< std::endl<< "####################################################" << std::endl<< std::endl;
         }
