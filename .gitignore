@@ -1,6 +1,8 @@
 ReferenceModel/*
 
-!Reporter.cc
-!Driver.cc
-!GoldenModel.cc
-!Makefile
+!ReferenceModel/Reporter.cc
+!ReferenceModel/Driver.cc
+!ReferenceModel/GoldenModel.cc
+!ReferenceModel/Makefile
+!ReferenceModel/includes.h
+!ReferenceModel/constants.h
