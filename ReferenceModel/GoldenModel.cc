@@ -96,7 +96,7 @@ SC_MODULE(Compressor){
                 //ERROR
                 std::cout << "ERROR : MEMORY FULL" << std::endl;
                 response[0] -> write(1);
-                response[0] -> write(1);
+                response[1] -> write(1);
                 continue;
             }
 
@@ -262,6 +262,7 @@ int sc_main(int, char *[]){
         sc_trace(file, data_in[i], "data_in");
     for (int i = 0; i < 80; i++)
         sc_trace(file, decompressed_out[i], "decompressed_out");
+        
     
   
     
