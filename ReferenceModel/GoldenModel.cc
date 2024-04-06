@@ -137,21 +137,12 @@ SC_MODULE(Compressor){
 
                 search_flag = false;
                 for(int i = 0; i <= index_buffer; i++){
-                    for (int j = 0; j < 80; j++){
-                        if (table[i] != data_in->read())
-                            break;
-                            
-                        if (j == 79){
-                            search_flag = true;
-                        }
-                    }
-                    std::cout << " FOUND :  " << search_flag << " on iteration : " << i << std::endl;
+                    if (table[i] == data_in->read()){
+                        std::cout << " FOUND :  " << search_flag << " on iteration : " << i << std::endl;
 
-                    std::cout << "INDEX BUFFER : " << index_buffer << std::endl; 
+                        std::cout << "INDEX BUFFER : " << index_buffer << std::endl;
 
-                    if (search_flag){
-                    temp = i;
-                        
+                        temp = i;
                     }else{
                         temp = index_buffer + 1;
 
@@ -161,6 +152,7 @@ SC_MODULE(Compressor){
                         
                         index_buffer = temp; 
                     }
+                    
 
                     compressed_out->write(temp);
                     break;   

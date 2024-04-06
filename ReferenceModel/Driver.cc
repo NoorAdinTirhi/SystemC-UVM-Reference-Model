@@ -29,17 +29,18 @@ SC_MODULE(Driver) {
 
             for (int i = 0; i < 2; i++){
                 commandString.append(std::to_string((rand()%2 == 0)?1:0));
-                command->write(commandString.c_str());
             }
+            // command->write(commandString.c_str());
+            command->write("01");
+
             for (int i = 0; i < 80; i++){
                 data_inString.append(std::to_string((rand()%2 == 0)?1:0));
-                data_in->write(data_inString.c_str());
             }
-
+            data_in->write(data_inString.c_str());
             for (int i = 0; i < 8; i++){
                 compressed_inString.append(std::to_string((rand()%2 == 0)?1:0));
-                compressed_in->write(compressed_inString.c_str());
             }
+            compressed_in->write(compressed_inString.c_str());
 
             wait(5, SC_NS);
             clk->write(true);
