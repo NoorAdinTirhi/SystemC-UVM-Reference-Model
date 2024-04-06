@@ -2,6 +2,7 @@
 #include <stdio.h>  
 #include <stdlib.h> 
 #include <time.h>
+#include <vector>
 
 #include "constants.h"
 #include "includes.h"
@@ -20,31 +21,33 @@ SC_MODULE(Compressor){
     sc_port<sc_signal_in_if<bool>> clk;
     sc_port<sc_signal_in_if<bool>> reset;
 
+
     //command pair, used for deciding compression,decompression or nop
-    sc_port<sc_signal_in_if<bool>, 2, SC_ALL_BOUND> command; 
+    sc_port<sc_signal_in_if<sc_dt::sc_lv<2>>> command; 
 
     //data_in, 80bit bus used to input data that is going to be compressed
-    sc_port<sc_signal_in_if<bool>, 80, SC_ALL_BOUND> data_in;
+    sc_port<sc_signal_in_if<sc_dt::sc_lv<80>>> data_in;
 
     //compressed_in, 8bit bus used to input search for decompression
-    sc_port<sc_signal_in_if<bool>, COMPRESSED_IN_WIDTH, SC_ALL_BOUND> compressed_in;
+    sc_port<sc_signal_in_if<sc_dt::sc_lv<COMPRESSED_IN_WIDTH>>> compressed_in;
 
     //output ports
 
     //compressed_out, 8bit bus used to output compression result
-    sc_port<sc_signal_out_if<bool>, COMPRESSED_IN_WIDTH, SC_ALL_BOUND> compressed_out;
+    sc_port<sc_signal_out_if<sc_dt::sc_lv<COMPRESSED_IN_WIDTH>>> compressed_out;
 
     //decompressed_out, 80bit bus used to output decompression result
-    sc_port<sc_signal_out_if<bool>, 80, SC_ALL_BOUND> decompressed_out;
+    sc_port<sc_signal_out_if<sc_dt::sc_lv<80>>> decompressed_out;
 
     //response, used to show if the current output is a valid compression result, decompression result, invalid, or is an error
-    sc_port<sc_signal_out_if<bool>, 2, SC_ALL_BOUND> response;
+    sc_port<sc_signal_out_if<sc_dt::sc_lv<2>>> response;
 
     //index buffer
 
     int index_buffer;
+    
 
-    std::vector <std::vector<bool>> table;
+
     
 
     SC_CTOR(Compressor){
@@ -52,110 +55,90 @@ SC_MODULE(Compressor){
     }
 
     void Behavior(){
+        std::vector<sc_dt::sc_lv<80>> table (std::pow(2, COMPRESSED_IN_WIDTH));
 
-        table.reserve(std::pow(2, COMPRESSED_IN_WIDTH));
+        for(int i = 0; i < std::pow(2, COMPRESSED_IN_WIDTH); i++){
+                table[i] = sc_dt::sc_lv<80>(nZeroString(80).c_str());
+        }
         
         bool search_flag = false;
 
-
-        std::vector<bool> temp;
+        int temp;
 
         int x = 0;
 
 
         int sum = 0;
-        for(int i = 0; i < std::pow(2, COMPRESSED_IN_WIDTH); i++){
-            table[i].reserve(80);
-            for (int j = 0; j < 80; j++){
-                table[i][j] = false;
-            }
-        }
+
         index_buffer = 0;
-        for (int i = 0; i < 2; i++){
-            response[i]->write(false);
-        }
+        
+        response->write("00");
 
         while (true) {
             wait(clk->posedge_event());
             if (reset->read()){
                 //RESET
                 for(int i = 0; i < std::pow(2, COMPRESSED_IN_WIDTH); i++){
-                    for (int j = 0; j < 80; j++){
-                        table[i][j] = false;
-                    }
+                    table[i] = sc_dt::sc_lv<80>(nZeroString(80).c_str());
                 }
                 index_buffer = 0;
 
-                for (int i = 0; i < 2; i++){
-                    response[i]->write(false);
-                }
+                response->write("00");
                 continue;
             }
 
             if(index_buffer >= std::pow(2, COMPRESSED_IN_WIDTH) - 1){
                 //ERROR
                 std::cout << "ERROR : MEMORY FULL" << std::endl;
-                response[0] -> write(1);
-                response[1] -> write(1);
+                response->write("11");
                 continue;
             }
 
-            if (command[0]->read() == 1 && command[1]->read() == 1){
+            if (command->read() == sc_dt::sc_lv<2>("11")){
                 //ERROR
                 std::cout << "ERROR : COMMAND is 11" << std::endl;
-                response[0]->write(1);
-                response[1]->write(1);
+                response->write("11");
                 continue;
             }
 
-            if(command[0]->read() == 0 && command[1]->read() == 0){
+            if(command->read() == sc_dt::sc_lv<2>("00")){
                 //NO OPERATION
                 std::cout << "NO OPERATION" << std::endl;
-                response[0]->write(0);
-                response[1]->write(0);
+                response->write("00");
                 continue;
             }
 
 
-            if (command[0]->read() == 1 && command[1]->read() == 0){
+            if (command->read() == sc_dt::sc_lv<2>("10")){
                 //DECOMPRESSION
                 std::cout << "DECOMPRESSION : ";
                 
                 //check if input is already registered
 
-                sum = 0;
-                for (int i = 0; i < COMPRESSED_IN_WIDTH; i++){
-                    sum += (compressed_in[i] -> read()) ? std::pow(2,i) : 0;
-                }
-                if (sum < index_buffer ){
+                
+                if (compressed_in->read().to_int() <= index_buffer ){
                     // VALID DECOMPRESSION
                     std::cout << "VALID" << std::endl;
-                    for (int j = 0; j < 80; j++){
-                        decompressed_out[j] -> write(table[sum][j]);
-                    }
-                    response[0] -> write(1);
-                    response[1] -> write(0);
+
+                    decompressed_out -> write(table[compressed_in->read().to_int()]);
+                    response -> write("01");
+
                 }else{
-                    std::cout << "ERROR" << std::endl;
-                    response[0] -> write(1);
-                    response[1] -> write(1);
+                    std::cout << "ERROR : " << compressed_in->read().to_int() << " > " << index_buffer << std::endl;
+                    response -> write("11");
                 }
             }
                 
-            else if (command[0]->read() == 0 && command[1]->read() == 1){
+            else if (command->read() == sc_dt::sc_lv<2>("01")){
                 //COMPRESSION
                 std::cout << "COMPRESSION VALID ";
 
-                response[0] -> write(0);
-                response[1] -> write(1);
+                response -> write("10");
 
-
-                temp.reserve(32);
                 search_flag = false;
                 for(int i = 0; i <= index_buffer; i++){
-
                     for (int j = 0; j < 80; j++){
-                        if (table[i][j] != data_in[j]->read())
+                        if (table[i] != data_in->read())
                             break;
                             
                         if (j == 79){
@@ -167,21 +150,19 @@ SC_MODULE(Compressor){
                     std::cout << "INDEX BUFFER : " << index_buffer << std::endl; 
 
                     if (search_flag){
-                    for (int j = 0; j < 32; j++)
-                        temp[i] = ( ( (1<<j) & i )>>i == 1 );
-                    }else{
-                        x = index_buffer + 1;
-
-                        for (int j = 0; j < 32; j++)
-                            temp[i] = ( ( (1<<j) & x )>>i == 1 );
-
-                        for(int j = 0; j < 80; j++)
-                            table[x][j] = data_in[j]->read();
+                    temp = i;
                         
-                        index_buffer = x; 
+                    }else{
+                        temp = index_buffer + 1;
+
+                        table[index_buffer] = ( data_in->read());
+
+                        std::cout << "table entry number : " << index_buffer << " : " << table[index_buffer] << std::endl;
+                        
+                        index_buffer = temp; 
                     }
-                    for (int j = 0; j < COMPRESSED_IN_WIDTH; j ++ )
-                        compressed_out[j]->write(temp[j]);
+
+                    compressed_out->write(temp);
                     break;   
                 }
             }
@@ -193,19 +174,19 @@ SC_MODULE(Compressor){
 int sc_main(int, char *[]){
 
     //initialize random seed
-    srand(10);
+    srand(time(NULL));
     
     //compressor inputs
-    sc_signal<bool> clk;
     sc_signal<bool> reset;
-    std::vector<sc_signal<bool>> command(2);
-    std::vector<sc_signal<bool>> data_in(80);
-    std::vector<sc_signal<bool>> compressed_in(COMPRESSED_IN_WIDTH);
+    sc_signal<bool> clk;
+    sc_signal<sc_dt::sc_lv<2>> command;
+    sc_signal<sc_dt::sc_lv<80>> data_in;
+    sc_signal<sc_dt::sc_lv<COMPRESSED_IN_WIDTH>> compressed_in;
 
     //compressor outputs
-    std::vector<sc_signal<bool>> compressed_out(COMPRESSED_IN_WIDTH);
-    std::vector<sc_signal<bool>> decompressed_out(80);
-    std::vector<sc_signal<bool>> response(2);
+    sc_signal<sc_dt::sc_lv<COMPRESSED_IN_WIDTH>> compressed_out;
+    sc_signal<sc_dt::sc_lv<80>> decompressed_out;
+    sc_signal<sc_dt::sc_lv<2>> response;
 
     Driver D1("driver");
 
@@ -215,53 +196,43 @@ int sc_main(int, char *[]){
 
     sc_trace_file* file = sc_create_vcd_trace_file("trace");
 
-    //binding the modules' ports
+    //binding the Driver's ports
     D1.clk(clk);
-    C1.clk(clk);
-    R1.clk(clk);
-
     D1.reset(reset);
+    D1.command(command);
+    D1.data_in(data_in);
+    D1.compressed_in(compressed_in);
+
+    //binding the Compressor's ports
+    C1.clk(clk);
     C1.reset(reset);
+    C1.command(command);
+    C1.response(response);
+    C1.data_in(data_in);
+    C1.decompressed_out(decompressed_out);
+    C1.compressed_in(compressed_in);
+    C1.compressed_out(compressed_out);
+
+    //binding Reporter's ports
+    R1.clk(clk);    
     R1.reset(reset);
-    
-    for(int i = 0; i < 2; i++){
-        D1.command(command[i]);
-        C1.command(command[i]);
-        C1.response(response[i]);
-        R1.response(response[i]);
-        R1.command(response[i]);
-    }
-        
-    for(int i = 0; i < 80; i++){
-        D1.data_in(data_in[i]);
-        C1.data_in(data_in[i]);
-        R1.data_in(data_in[i]);
-        C1.decompressed_out(decompressed_out[i]);
-        R1.decompressed_out(decompressed_out[i]);
-    }
-        
-    for(int i = 0; i < COMPRESSED_IN_WIDTH; i ++){
-        D1.compressed_in(compressed_in[i]);
-        C1.compressed_in(compressed_in[i]);
-        R1.compressed_in(compressed_in[i]);
-        C1.compressed_out(compressed_out[i]);
-        R1.compressed_out(compressed_out[i]);
-    }
-    
+    R1.response(response);
+    R1.command(response);
+    R1.data_in(data_in);
+    R1.decompressed_out(decompressed_out);
+    R1.compressed_in(compressed_in);
+    R1.compressed_out(compressed_out);
+
+
+    //Trace Signals
     sc_trace(file, clk, "clk");
     sc_trace(file, reset, "reset");
-    for (int i = 0; i < 2; i++)
-        sc_trace(file, response[i], "response");
-    for (int i = 0; i < 2; i++)
-        sc_trace(file, command[i], "command");
-    for (int i = 0; i < COMPRESSED_IN_WIDTH; i++)
-        sc_trace(file, compressed_in[i], "compressed_in");
-    for (int i = 0; i < COMPRESSED_IN_WIDTH; i++)
-        sc_trace(file, compressed_out[i], "compressed_out");
-    for (int i = 0; i < 80; i++)
-        sc_trace(file, data_in[i], "data_in");
-    for (int i = 0; i < 80; i++)
-        sc_trace(file, decompressed_out[i], "decompressed_out");
+    sc_trace(file, response, "response");
+    sc_trace(file, command, "command");
+    sc_trace(file, compressed_in, "compressed_in");
+    sc_trace(file, compressed_out, "compressed_out");
+    sc_trace(file, data_in, "data_in");
+    sc_trace(file, decompressed_out, "decompressed_out");
         
     
   

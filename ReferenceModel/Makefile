@@ -1,11 +1,17 @@
 bin : GoldenModel.cc Driver.cc Reporter.cc includes.h constants.h
-	g++  -I$(SYSTEMC_HOME)/include  -L$(SYSTEMC_LIBDIR) -lsystemc -lm -o  bin GoldenModel.cc
+	clang++  -I$(SYSTEMC_HOME)/include  -L$(SYSTEMC_LIBDIR) -lsystemc -lm -o  bin GoldenModel.cc
 
-trace.vcd : bin
+run : bin
 	./bin
 
-run : trace.vcd
-	gtkwave trace.vcd
+bin_test : test.cc
+	clang++  -I$(SYSTEMC_HOME)/include  -L$(SYSTEMC_LIBDIR) -lsystemc -lm -o  bin_test test.cc
+
+run_test : bin_test
+	./bin_test
+
  
 clean :
 	rm bin
+	rm trace.vcd
+	rm bin_test

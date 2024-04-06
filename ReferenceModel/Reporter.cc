@@ -1,21 +1,23 @@
 using namespace sc_core;
 
 SC_MODULE(Reporter) {
+
+
     sc_port<sc_signal_in_if<bool>> clk;
 
     sc_port<sc_signal_in_if<bool>> reset;
 
-    sc_port<sc_signal_in_if<bool>, 2, SC_ALL_BOUND> command; 
+    sc_port<sc_signal_in_if<sc_dt::sc_lv<2>>> command; 
 
-    sc_port<sc_signal_in_if<bool>, 80, SC_ALL_BOUND> data_in;
+    sc_port<sc_signal_in_if<sc_dt::sc_lv<80>>> data_in;
 
-    sc_port<sc_signal_in_if<bool>, COMPRESSED_IN_WIDTH, SC_ALL_BOUND> compressed_in;
+    sc_port<sc_signal_in_if<sc_dt::sc_lv<COMPRESSED_IN_WIDTH>>> compressed_in;
 
-    sc_port<sc_signal_in_if<bool>, COMPRESSED_IN_WIDTH, SC_ALL_BOUND> compressed_out;
+    sc_port<sc_signal_in_if<sc_dt::sc_lv<COMPRESSED_IN_WIDTH>>> compressed_out;
 
-    sc_port<sc_signal_in_if<bool>, 80, SC_ALL_BOUND> decompressed_out;
+    sc_port<sc_signal_in_if<sc_dt::sc_lv<80>>> decompressed_out;
 
-    sc_port<sc_signal_in_if<bool>, 2, SC_ALL_BOUND> response;
+    sc_port<sc_signal_in_if<sc_dt::sc_lv<2>>> response;
 
     SC_CTOR(Reporter) {
         SC_THREAD(print);
@@ -26,37 +28,28 @@ SC_MODULE(Reporter) {
             wait(clk->posedge_event());
             wait(SC_ZERO_TIME);
             
-
-            
-
             std::cout << "Time : " << sc_time_stamp() << std::endl\
                 << "compressed out  : ";
             
             
-            for (int  i = COMPRESSED_IN_WIDTH-1; i > -1; i--)
-                std::cout << compressed_out[i] -> read();
+            std::cout << compressed_out -> read();
 
             std::cout << std::endl << "decompressed_out  : ";
 
-            for (int i = 79; i > -1; i--)
-                std::cout << decompressed_out[i] -> read();
+            std::cout << decompressed_out -> read();
             
             std::cout << std::endl << "response  : ";
 
-            for (int i = 1; i > -1; i--)
-                std::cout << response[i] -> read();
+            std::cout << response -> read();
             
             std::cout << std::endl << "Data_in  : ";
 
-            for (int i = 79; i > -1; i--)
-                
-                std::cout << data_in[i] -> read();
+            std::cout << data_in -> read();
 
 
             std::cout << std::endl << "compressed_in  : ";
 
-            for (int i = COMPRESSED_IN_WIDTH -1 ; i > -1; i--)
-                std::cout << compressed_in[i]->read();
+            std::cout << compressed_in->read();
 
             std::cout<< std::endl<< std::endl<< "####################################################" << std::endl<< std::endl;
         }
