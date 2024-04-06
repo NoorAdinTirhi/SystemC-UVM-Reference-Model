@@ -12,6 +12,6 @@ run_test : bin_test
 
  
 clean :
-	rm bin
-	rm trace.vcd
-	rm bin_test
+	rm *bin*
+	rm *.vcd
+	
