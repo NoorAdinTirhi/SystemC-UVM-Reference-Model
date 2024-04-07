@@ -29,27 +29,33 @@ SC_MODULE(Reporter) {
             wait(SC_ZERO_TIME);
             
             std::cout << "Time : " << sc_time_stamp() << std::endl\
-                << "compressed out  : ";
+                << "reset  : ";
             
+            std::cout << reset -> read();
+
+            std::cout << std::endl << "command  : ";
+
+            std::cout <<  command -> read();
+
+            std::cout << std::endl << "data_in  : ";
+
+            std::cout << data_in -> read();
             
+            std::cout << std::endl << "compressed_in  : ";
+
+            std::cout << compressed_in -> read();
+            
+            std::cout << std::endl << "compressed_out  : ";
+
             std::cout << compressed_out -> read();
 
             std::cout << std::endl << "decompressed_out  : ";
 
-            std::cout << decompressed_out -> read();
-            
+            std::cout << decompressed_out->read();
+
             std::cout << std::endl << "response  : ";
 
-            std::cout << response -> read();
-            
-            std::cout << std::endl << "Data_in  : ";
-
-            std::cout << data_in -> read();
-
-
-            std::cout << std::endl << "compressed_in  : ";
-
-            std::cout << compressed_in->read();
+            std::cout << response->read();
 
             std::cout<< std::endl<< std::endl<< "####################################################" << std::endl<< std::endl;
         }

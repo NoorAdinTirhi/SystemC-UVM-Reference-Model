@@ -89,21 +89,21 @@ SC_MODULE(Compressor){
 
             if(index_buffer >= std::pow(2, COMPRESSED_IN_WIDTH) - 1){
                 //ERROR
-                std::cout << "ERROR : MEMORY FULL" << std::endl;
+                std::cout << "ERROR : MEMORY FULL" << std::endl<< std::endl;
                 response->write("11");
                 continue;
             }
 
             if (command->read() == sc_dt::sc_lv<2>("11")){
                 //ERROR
-                std::cout << "ERROR : COMMAND is 11" << std::endl;
+                std::cout << "ERROR : COMMAND is 11" << std::endl<< std::endl;
                 response->write("11");
                 continue;
             }
 
             if(command->read() == sc_dt::sc_lv<2>("00")){
                 //NO OPERATION
-                std::cout << "NO OPERATION" << std::endl;
+                std::cout << "NO OPERATION" << std::endl<< std::endl;
                 response->write("00");
                 continue;
             }
@@ -114,18 +114,18 @@ SC_MODULE(Compressor){
                 std::cout << "DECOMPRESSION : ";
                 
                 //check if input is already registered
-
-                
                 if (compressed_in->read().to_int() <= index_buffer ){
-                    // VALID DECOMPRESSION
-                    std::cout << "VALID" << std::endl;
 
+                    // VALID DECOMPRESSION
+                    std::cout << "VALID" << std::endl<< std::endl;
                     decompressed_out -> write(table[compressed_in->read().to_int()]);
                     response -> write("01");
 
                 }else{
-                    std::cout << "ERROR : " << compressed_in->read().to_int() << " > " << index_buffer << std::endl;
+
+                    std::cout << "ERROR : " << compressed_in->read().to_int() << " > " << index_buffer << std::endl << std::endl;
                     response -> write("11");
+
                 }
             }
                 
@@ -138,22 +138,19 @@ SC_MODULE(Compressor){
                 search_flag = false;
                 for(int i = 0; i <= index_buffer; i++){
                     if (table[i] == data_in->read()){
+
                         std::cout << " FOUND :  " << search_flag << " on iteration : " << i << std::endl;
-
-                        std::cout << "INDEX BUFFER : " << index_buffer << std::endl;
-
+                        std::cout << "INDEX BUFFER : " << index_buffer << std::endl << std::endl;
                         temp = i;
+
                     }else{
-                        temp = index_buffer + 1;
 
                         table[index_buffer] = ( data_in->read());
+                        temp = index_buffer++;
+                        std::cout << "TABLE ENTRY NUMBER : " << temp << " : " << data_in->read() << std::endl << std::endl;
 
-                        std::cout << "table entry number : " << index_buffer << " : " << table[index_buffer] << std::endl;
-                        
-                        index_buffer = temp; 
                     }
-                    
-
+            
                     compressed_out->write(temp);
                     break;   
                 }
@@ -166,6 +163,7 @@ SC_MODULE(Compressor){
 int sc_main(int, char *[]){
 
     //initialize random seed
+    int seed = time(NULL);
     srand(time(NULL));
     
     //compressor inputs
@@ -225,12 +223,12 @@ int sc_main(int, char *[]){
     sc_trace(file, compressed_out, "compressed_out");
     sc_trace(file, data_in, "data_in");
     sc_trace(file, decompressed_out, "decompressed_out");
-        
     
-  
-    
-    sc_start(100000, SC_NS);
+    sc_start(50000, SC_NS);
     sc_close_vcd_trace_file(file); // close trace file
+
+    std::cout << "random seed : " << seed << std::endl;
+
     return 0;
 }
 

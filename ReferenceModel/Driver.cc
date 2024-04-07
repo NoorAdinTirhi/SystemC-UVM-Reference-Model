@@ -12,7 +12,6 @@ SC_MODULE(Driver) {
 
     SC_CTOR(Driver) {
         SC_THREAD(drive);
-        SC_THREAD(scheduelReset);
     }
 
     void drive(){
@@ -20,7 +19,8 @@ SC_MODULE(Driver) {
         std::string data_inString = "";
         std::string compressed_inString = "";
 
-        while(true){
+        //Random Drive
+        while(sc_time_stamp() < sc_time(20000, SC_NS)){
             clk->write(false);
 
             commandString = "";
@@ -30,14 +30,13 @@ SC_MODULE(Driver) {
             for (int i = 0; i < 2; i++){
                 commandString.append(std::to_string((rand()%2 == 0)?1:0));
             }
-            // command->write(commandString.c_str());
-            command->write("01");
+            command->write(commandString.c_str());
 
             for (int i = 0; i < 80; i++){
                 data_inString.append(std::to_string((rand()%2 == 0)?1:0));
             }
             data_in->write(data_inString.c_str());
-            for (int i = 0; i < 8; i++){
+            for (int i = 0; i < COMPRESSED_IN_WIDTH; i++){
                 compressed_inString.append(std::to_string((rand()%2 == 0)?1:0));
             }
             compressed_in->write(compressed_inString.c_str());
@@ -45,23 +44,83 @@ SC_MODULE(Driver) {
             wait(5, SC_NS);
             clk->write(true);
             wait(5, SC_NS);
+        }
+
+        //RESET, so tests don't affect each other
+        clk->write(false);
+        reset->write(true);
+        wait(5, SC_NS);
+        clk->write(true);
+        wait(5, SC_NS);
+        reset->write(false);
+
+        //Compression
+        command -> write("01");
+        while (sc_time_stamp() < sc_time(22500, SC_NS)){
+            clk->write(false);
+            data_inString = "";
+            for (int i = 0; i < 80; i++){
+                data_inString.append(std::to_string((rand()%2 == 0)?1:0));
+            }
+            data_in->write(data_inString.c_str());
+            wait(5, SC_NS);
+            clk->write(true);
+            wait(5, SC_NS);
+        }
+
+        //Decompression
+        command->write("10");
+        int decompressedPointer = 0;
+        while (sc_time_stamp() < sc_time(25000, SC_NS)){
+            clk->write(false);
+            compressed_in->write(sc_dt::sc_lv<COMPRESSED_IN_WIDTH>(decompressedPointer++));
+            wait(5, SC_NS);
+            clk->write(true);
+            wait(5, SC_NS);
+        }
+
+        //RESET, so tests don't affect each other
+        clk->write(false);
+        reset->write(true);
+        wait(5, SC_NS);
+        clk->write(true);
+        wait(5, SC_NS);
+        reset->write(false);
+
+        //Mixed
+        //Compression and Decompression
+        decompressedPointer = 0;
+        while (sc_time_stamp() < sc_time(30000, SC_NS)){
+            clk->write(false);
+
+            data_inString = "";
+            for (int i = 0; i < 80; i++){
+                data_inString.append(std::to_string((rand()%2 == 0)?1:0));
+            }
+            data_in->write(data_inString.c_str());
+
+            command->write("01");
+
+            wait(5, SC_NS);
+            clk->write(true);
+            wait(5, SC_NS);
+            clk->write(false);
+
+            data_inString = "";
+            for (int i = 0; i < 80; i++){
+                data_inString.append(std::to_string((rand()%2 == 0)?1:0));
+            }
+            data_in->write(data_inString.c_str());
+
+            compressed_in->write(decompressedPointer++);
+            command->write("10");
+
+            wait(5, SC_NS);
+            clk->write(true);
+            wait(5, SC_NS);
+            clk->write(false);
 
         }
-    }
-    void scheduelReset(){
-        int i = 1;
-        reset->write(false);
-        while (true)
-        {
-            if (abs((sc_time_stamp() - sc_time(11000, SC_NS)* i)/sc_time(11000, SC_NS)) < 0.1 ){
-                reset->write(true);
-                i++;
-            }else{
-                reset->write(false);
-            }
-            wait(10, SC_NS);
-        }
-        
     }
 
 
