@@ -1,6 +1,9 @@
 
 using namespace sc_core;
 
+//Driver Module will stimulate the reference model
+//Purely for the Reference Model Demo
+
 SC_MODULE(Driver) {
     int compressed_in_width = 8;
     int randomNumber;
@@ -19,14 +22,15 @@ SC_MODULE(Driver) {
         std::string data_inString = "";
         std::string compressed_inString = "";
 
-        //Random Drive
+        // Psudo-Random Stimulus
         while(sc_time_stamp() < sc_time(20000, SC_NS)){
             clk->write(false);
 
             commandString = "";
             data_inString = "";
             compressed_inString = "";
-
+            
+            
             for (int i = 0; i < 2; i++){
                 commandString.append(std::to_string((rand()%2 == 0)?1:0));
             }

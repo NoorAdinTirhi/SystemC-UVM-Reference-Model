@@ -1,5 +1,8 @@
 using namespace sc_core;
 
+// Reporter Module prints out Compressor output
+// Purely for the Reference Model Demo
+
 SC_MODULE(Reporter) {
 
 

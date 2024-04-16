@@ -14,6 +14,7 @@
 
 using namespace sc_core;
 
+//Compressor Module
 SC_MODULE(Compressor){
     //input ports
 
@@ -55,12 +56,14 @@ SC_MODULE(Compressor){
     }
 
     void Behavior(){
+        //hash table, maps compressed bits to data bits
         std::vector<sc_dt::sc_lv<80>> table (std::pow(2, COMPRESSED_IN_WIDTH));
 
         for(int i = 0; i < std::pow(2, COMPRESSED_IN_WIDTH); i++){
                 table[i] = sc_dt::sc_lv<80>(nZeroString(80).c_str());
         }
         
+        //temp variables used for calculations
         bool search_flag = false;
 
         int temp;
@@ -74,6 +77,7 @@ SC_MODULE(Compressor){
         
         response->write("00");
 
+        // always loop equivelant, similar to behavioral programming
         while (true) {
             wait(clk->posedge_event());
             if (reset->read()){
@@ -160,6 +164,8 @@ SC_MODULE(Compressor){
     
 };
 
+// this is where the 3 modules' ports are connected
+// Driver->Compressor->Reporter
 int sc_main(int, char *[]){
 
     //initialize random seed
