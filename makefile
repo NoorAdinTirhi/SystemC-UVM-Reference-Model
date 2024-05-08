@@ -11,7 +11,11 @@ compile : obj_dir/Valu.mk
 clean : 
 	rm -rf obj_dir
 
-run : obj_dir/Valu
+run : obj_dir/Valu ReferenceModel/bin
 	./obj_dir/Valu
+
+ReferenceModel/bin : utils.h Reporter.cc Driver.cc GoldenModel.cc
+	make -C ReferenceModel clean
+	make -C ReferenceModel bin
 
 all : verilate1 verilate2 compile run
