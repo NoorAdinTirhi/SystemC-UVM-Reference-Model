@@ -10,12 +10,13 @@ compile : obj_dir/Valu.mk
 
 clean : 
 	rm -rf obj_dir
+	rm trace.vcd waveform.vcd
+	make -C ReferenceModel clean
 
 run : obj_dir/Valu ReferenceModel/bin
 	./obj_dir/Valu
 
-ReferenceModel/bin : utils.h Reporter.cc Driver.cc GoldenModel.cc
-	make -C ReferenceModel clean
+ReferenceModel/bin :
 	make -C ReferenceModel bin
 
 all : verilate1 verilate2 compile run
