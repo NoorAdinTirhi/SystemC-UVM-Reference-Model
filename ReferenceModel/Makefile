@@ -1,4 +1,4 @@
-bin : GoldenModel.cc Driver.cc Reporter.cc includes.h constants.h
+bin : GoldenModel.cc Driver.cc Reporter.cc ../includes.h utils.h
 	g++  -I$(SYSTEMC_HOME)/include  -L$(SYSTEMC_LIBDIR) -lsystemc -lm -o  bin GoldenModel.cc
 
 run : bin

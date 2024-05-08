@@ -5,8 +5,10 @@ using namespace sc_core;
 //Purely for the Reference Model Demo
 
 SC_MODULE(Driver) {
+
     int compressed_in_width = 8;
     int randomNumber;
+
     sc_port<sc_signal_out_if<bool>> clk;
     sc_port<sc_signal_out_if<bool>> reset;
     sc_port<sc_signal_out_if<sc_dt::sc_lv<2>>>  command; 
@@ -17,116 +19,53 @@ SC_MODULE(Driver) {
         SC_THREAD(drive);
     }
 
+
+
     void drive(){
-        std::string commandString = "";
-        std::string data_inString = "";
-        std::string compressed_inString = "";
 
-        // Psudo-Random Stimulus
-        while(sc_time_stamp() < sc_time(20000, SC_NS)){
-            clk->write(false);
+        messageToDriver dMessage;
+        dMessage.mesg_type = 1;
+        
+        int ipc_key = ftok(FTOK_PATH, DSEED+1);
 
-            commandString = "";
-            data_inString = "";
-            compressed_inString = "";
-            
-            
-            for (int i = 0; i < 2; i++){
-                commandString.append(std::to_string((rand()%2 == 0)?1:0));
-            }
-            command->write(commandString.c_str());
+        int messageQueue = msgget(ipc_key, 0666 | IPC_CREAT);
 
-            for (int i = 0; i < 80; i++){
-                data_inString.append(std::to_string((rand()%2 == 0)?1:0));
-            }
-            data_in->write(data_inString.c_str());
-            for (int i = 0; i < COMPRESSED_IN_WIDTH; i++){
-                compressed_inString.append(std::to_string((rand()%2 == 0)?1:0));
-            }
-            compressed_in->write(compressed_inString.c_str());
+        std::cout << "Driver sees : " << messageQueue << std::endl;
 
-            wait(5, SC_NS);
-            clk->write(true);
-            wait(5, SC_NS);
+        if (messageQueue == -1){
+            perror("msgget");
+            exit(1);
         }
 
-        //RESET, so tests don't affect each other
-        clk->write(false);
-        reset->write(true);
-        wait(5, SC_NS);
-        clk->write(true);
-        wait(5, SC_NS);
-        reset->write(false);
+        std::string commandStr;
+        std::string dataStr;
+        std::string compressedStr;
 
-        //Compression
-        command -> write("01");
-        while (sc_time_stamp() < sc_time(22500, SC_NS)){
-            clk->write(false);
-            data_inString = "";
-            for (int i = 0; i < 80; i++){
-                data_inString.append(std::to_string((rand()%2 == 0)?1:0));
-            }
-            data_in->write(data_inString.c_str());
-            wait(5, SC_NS);
-            clk->write(true);
-            wait(5, SC_NS);
-        }
+        while(true){
+            msgrcv(messageQueue, &dMessage, sizeof(dMessage), 1, 0);
 
-        //Decompression
-        command->write("10");
-        int decompressedPointer = 0;
-        while (sc_time_stamp() < sc_time(25000, SC_NS)){
-            clk->write(false);
-            compressed_in->write(sc_dt::sc_lv<COMPRESSED_IN_WIDTH>(decompressedPointer++));
-            wait(5, SC_NS);
-            clk->write(true);
-            wait(5, SC_NS);
-        }
-
-        //RESET, so tests don't affect each other
-        clk->write(false);
-        reset->write(true);
-        wait(5, SC_NS);
-        clk->write(true);
-        wait(5, SC_NS);
-        reset->write(false);
-
-        //Mixed
-        //Compression and Decompression
-        decompressedPointer = 0;
-        while (sc_time_stamp() < sc_time(30000, SC_NS)){
             clk->write(false);
 
-            data_inString = "";
-            for (int i = 0; i < 80; i++){
-                data_inString.append(std::to_string((rand()%2 == 0)?1:0));
-            }
-            data_in->write(data_inString.c_str());
+            commandStr = std::string(dMessage.command);
+            dataStr = std::string(dMessage.data_in);
+            compressedStr = std::string(dMessage.compressed_in);
 
-            command->write("01");
+            command->write(sc_dt::sc_lv<2>(commandStr.c_str()));
+
+            data_in->write(sc_dt::sc_lv<80>(dataStr.c_str())    );
+
+            compressed_in->write(sc_dt::sc_lv<COMPRESSED_IN_WIDTH>(compressedStr.c_str()));
+
+            reset->write(dMessage.reset);
+
+            wait(SC_ZERO_TIME);
+
+            // std::cout << "Driver: " << "cmprssd  " << "cmd " << "data_in" << std::endl; 
+            std::cout << "Driver: " << compressed_in->read().to_string() << " " << command->read()  << "  " << data_in->read()  << std::endl;
 
             wait(5, SC_NS);
             clk->write(true);
             wait(5, SC_NS);
-            clk->write(false);
-
-            data_inString = "";
-            for (int i = 0; i < 80; i++){
-                data_inString.append(std::to_string((rand()%2 == 0)?1:0));
-            }
-            data_in->write(data_inString.c_str());
-
-            compressed_in->write(decompressedPointer++);
-            command->write("10");
-
-            wait(5, SC_NS);
-            clk->write(true);
-            wait(5, SC_NS);
-            clk->write(false);
-
         }
     }
-
-
-
 };

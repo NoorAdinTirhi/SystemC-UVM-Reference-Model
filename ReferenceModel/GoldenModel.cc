@@ -4,8 +4,8 @@
 #include <time.h>
 #include <vector>
 
-#include "constants.h"
-#include "includes.h"
+#include "utils.h"
+#include "../includes.h"
 #include "Driver.cc"
 #include "Reporter.cc"
 
@@ -56,6 +56,9 @@ SC_MODULE(Compressor){
     }
 
     void Behavior(){
+
+        std::cout<< "Compressor Started" << std::endl;
+
         //hash table, maps compressed bits to data bits
         std::vector<sc_dt::sc_lv<80>> table (std::pow(2, COMPRESSED_IN_WIDTH));
 
@@ -80,6 +83,7 @@ SC_MODULE(Compressor){
         // always loop equivelant, similar to behavioral programming
         while (true) {
             wait(clk->posedge_event());
+            wait(SC_ZERO_TIME);
             if (reset->read()){
                 //RESET
                 for(int i = 0; i < std::pow(2, COMPRESSED_IN_WIDTH); i++){
@@ -213,27 +217,13 @@ int sc_main(int, char *[]){
     R1.clk(clk);    
     R1.reset(reset);
     R1.response(response);
-    R1.command(response);
+    R1.command(command);
     R1.data_in(data_in);
     R1.decompressed_out(decompressed_out);
     R1.compressed_in(compressed_in);
     R1.compressed_out(compressed_out);
 
-
-    //Trace Signals
-    sc_trace(file, clk, "clk");
-    sc_trace(file, reset, "reset");
-    sc_trace(file, response, "response");
-    sc_trace(file, command, "command");
-    sc_trace(file, compressed_in, "compressed_in");
-    sc_trace(file, compressed_out, "compressed_out");
-    sc_trace(file, data_in, "data_in");
-    sc_trace(file, decompressed_out, "decompressed_out");
-    
-    sc_start(50000, SC_NS);
-    sc_close_vcd_trace_file(file); // close trace file
-
-    std::cout << "random seed : " << seed << std::endl;
+    sc_start(100, SC_NS);
 
     return 0;
 }
