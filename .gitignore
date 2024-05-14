@@ -6,3 +6,5 @@ ReferenceModel/*
 !ReferenceModel/Makefile
 !ReferenceModel/includes.h
 !ReferenceModel/constants.h
+
+obj_dir

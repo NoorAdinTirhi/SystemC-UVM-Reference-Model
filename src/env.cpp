@@ -3,14 +3,15 @@
 #include <verilated.h>
 #include <verilated_vcd_c.h>
 #include "includes.h"
-#include "Valu.h"
-#include "Valu___024unit.h"
+#include "Vtb_top.h"
 
 #define MAX_SIM_TIME 4
 vluint64_t sim_time = 0;
 
 int main(int argc, char **argv, char **env)
 {
+    Verilated::commandArgs(argc, argv);
+
     messageFromReporter rMessage;
     rMessage.mesg_type = 1;
     
@@ -41,7 +42,7 @@ int main(int argc, char **argv, char **env)
         execl("./ReferenceModel/bin", NULL);
     }else{
     
-        Valu *dut = new Valu;
+        Vtb_top *dut = new Vtb_top;
         Verilated::traceEverOn(true);
         VerilatedVcdC *m_trace = new VerilatedVcdC;
         dut->trace(m_trace, 5);
@@ -52,6 +53,7 @@ int main(int argc, char **argv, char **env)
         while (sim_time < MAX_SIM_TIME)
         {
             dut->clk ^= 1;
+            dut->reset = 0;
             if (dut->clk == 1)
             {
                 dut->eval();
