@@ -30,12 +30,13 @@ using namespace std;
 typedef struct messageFromReporter
 {
     long mesg_type;
-    char compressed_out[COMPRESSED_IN_WIDTH];
+    int x;
+    char compressed_out[COMPRESSED_IN_WIDTH+1];
     char decompressed_out[81];
     char response[3];
     char command[3];
     char data_in[81];
-    char compressed_in[COMPRESSED_IN_WIDTH];
+    char compressed_in[COMPRESSED_IN_WIDTH+1];
     bool reset;
     
 }messageFromReporter;
@@ -45,8 +46,7 @@ typedef struct messageToDriver{
     long mesg_type;
     char command[3];
     char data_in[81];
-    char compressed_in[COMPRESSED_IN_WIDTH];
+    char compressed_in[COMPRESSED_IN_WIDTH+1];
     bool reset;
     
 } messageToDriver;
-

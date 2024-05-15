@@ -35,7 +35,7 @@ clean :
 run : obj_dir/Vtb_top src/ReferenceModel/bin
 	obj_dir/Vtb_top
 
-ReferenceModel/bin :
+src/ReferenceModel/bin :
 	make -C src/ReferenceModel bin
 
 all : verilate1 verilate2 compile run

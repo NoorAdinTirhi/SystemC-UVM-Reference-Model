@@ -5,7 +5,7 @@
 #include "includes.h"
 #include "Vtb_top.h"
 
-#define MAX_SIM_TIME 4
+#define MAX_SIM_TIME 20
 vluint64_t sim_time = 0;
 
 int main(int argc, char **argv, char **env)
@@ -27,8 +27,6 @@ int main(int argc, char **argv, char **env)
     int DmsgQ = msgget(dIpc_key, 0666 | IPC_CREAT);
     int RmsgQ = msgget(rIpc_key, 0666 | IPC_CREAT);
 
-    cout << "env sees DQ: " << DmsgQ << endl;
-    cout << "env sees RQ: " << RmsgQ << endl;
 
     if (DmsgQ == -1 || RmsgQ == -1){
         perror("Dmsgget");
@@ -40,6 +38,7 @@ int main(int argc, char **argv, char **env)
     if (PID == 0){
         cout << "Starting Reference Model" << endl;
         execl("./ReferenceModel/bin", NULL);
+
     }else{
     
         Vtb_top *dut = new Vtb_top;
@@ -53,17 +52,15 @@ int main(int argc, char **argv, char **env)
         while (sim_time < MAX_SIM_TIME)
         {
             dut->clk ^= 1;
-            dut->reset = 0;
-            if (dut->clk == 1)
-            {
-                dut->eval();
-                m_trace->dump(sim_time);
-            }
+            dut->eval();
+            m_trace->dump(sim_time);
+
             //read values from UVM and send to reference model
-            strncpy(dMessage.command, "01", 2);
-            strncpy(dMessage.data_in, "1101001110110001010001010011", 80);
-            strncpy(dMessage.compressed_in, "11010011", 8);
+            strncpy(dMessage.command, "01\0", 3);
+            strncpy(dMessage.data_in, "1101001110110001010001010011\0", 80);
+            strncpy(dMessage.compressed_in, "11010011\0", COMPRESSED_IN_WIDTH+1);
             dMessage.reset = false;
+
 
 
             msgsnd(DmsgQ, &dMessage, sizeof(dMessage), 0);
@@ -73,14 +70,14 @@ int main(int argc, char **argv, char **env)
 
             //TODO: send to UVM
 
-            //print out rMessage results
-            cout << "Compressed Out: " << rMessage.compressed_out << endl;
-            cout << "Decompressed Out: " << rMessage.decompressed_out << endl;
-            cout << "Response: " << rMessage.response << endl;
-            cout << "Command: " << rMessage.command << endl;
-            cout << "Data In: " << rMessage.data_in << endl;
-            cout << "Compressed In: " << rMessage.compressed_in << endl;
-            cout << "Reset: " << rMessage.reset << endl;
+            // // print out rMessage results
+            // cout << "Compressed Out: " << rMessage.compressed_out << endl;
+            // cout << "Decompressed Out: " << rMessage.decompressed_out << endl;
+            // cout << "Response: " << rMessage.response << endl;
+            // cout << "Command: " << rMessage.command << endl;
+            // cout << "Data In: " << rMessage.data_in << endl;
+            // cout << "Compressed In: " << rMessage.compressed_in << endl;
+            // cout << "Reset: " << rMessage.reset << endl;
 
             sim_time++;
         }

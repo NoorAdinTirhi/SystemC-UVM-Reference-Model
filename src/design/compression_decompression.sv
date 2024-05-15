@@ -25,6 +25,7 @@ module compression_decompression #(
 
 
   always @(posedge clk or posedge reset) begin
+    $display("POSEDGE DETECTED");
     first_empty_index = find_first_empty();  // temp variable so we use blocking.
 
     // Either we reset the design.

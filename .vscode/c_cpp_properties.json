@@ -5,7 +5,7 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/obj_dir/**",
-                "${SYSTEMC_HOME}/include/**",
+                "/home/nooradin/Documents/systemc-3.0.0/include/**",
                 "/usr/share/verilator/include"
             ],
             "defines": [],
