@@ -30,6 +30,8 @@ SC_MODULE(Driver) {
 
         int messageQueue = msgget(ipc_key, 0666 | IPC_CREAT);
 
+        sc_dt::sc_lv<80> data_in_temp;
+
         std::cout << "Driver sees : " << messageQueue << std::endl;
 
         if (messageQueue == -1){
@@ -37,31 +39,30 @@ SC_MODULE(Driver) {
             exit(1);
         }
 
-        std::string commandStr;
-        std::string dataStr;
-        std::string compressedStr;
-
         while(true){
             msgrcv(messageQueue, &dMessage, sizeof(dMessage), 1, 0);
 
             clk->write(false);
 
-            commandStr = std::string(dMessage.command);
-            dataStr = std::string(dMessage.data_in);
-            compressedStr = std::string(dMessage.compressed_in);
 
-            command->write(sc_dt::sc_lv<2>(commandStr.c_str()));
+            command->write(static_cast<unsigned>(dMessage.command));
 
-            data_in->write(sc_dt::sc_lv<80>(dataStr.c_str())    );
+            for (int i = 0; i < 10; i++){
+                for(int j = 0; j < 8; j++){
+                    data_in_temp.bit(j + i * 8) =  (static_cast<int>(dMessage.data_in[i]) >> j) & 1;
+                }
+            }
 
-            compressed_in->write(sc_dt::sc_lv<COMPRESSED_IN_WIDTH>(compressedStr.c_str()));
+            data_in->write(data_in_temp);
+
+            compressed_in->write(static_cast<unsigned>(dMessage.compressed_in));
 
             reset->write(dMessage.reset);
 
             wait(SC_ZERO_TIME);
 
             // std::cout << "Driver: " << "cmprssd  " << "cmd " << "data_in" << std::endl; 
-            std::cout << "Driver: " << compressed_in->read().to_string() << " " << command->read()  << "  " << data_in->read()  << std::endl;
+            // std::cout << "Driver: " << compressed_in->read() << " " << command->read()  << "  " << data_in->read()  << std::endl;
 
             wait(5, SC_NS);
             clk->write(true);

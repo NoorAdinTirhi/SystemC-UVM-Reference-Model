@@ -11,14 +11,15 @@ WARNING_ARGS += -Wno-lint \
 	-Wno-IGNOREDRETURN \
 	-Wno-CONSTRAINTIGN \
 	-Wno-WIDTH \
-	-Wno-PINMISSING
+	-Wno-PINMISSING\
+	-Wno-SELRANGE 
 
 COMPILE_ARGS += -DUVM_NO_DPI
 # COMPILE_ARGS += --prefix $(SIM_NAME) -o $(SIM_NAME)
 # COMPILE_ARGS += $(addprefix +incdir+, $(VERILOG_INCLUDE_DIRS))
 
 verilate1 : src/tb_top.sv
-	verilator --cc --timing -I${UVM_HOME}/src -Isrc ${WARNING_ARGS} ${COMPILE_ARGS} src/tb_top.sv
+	verilator --cc --timing -I${UVM_HOME}/src -Isrc ${WARNING_ARGS} ${COMPILE_ARGS} --top tb_top src/tb_top.sv
 
 
 verilate2 : obj_dir/Vtb_top.h  src/env.cpp src/tb_top.sv

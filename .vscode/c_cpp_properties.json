@@ -5,8 +5,8 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/obj_dir/**",
-                "/home/nooradin/Documents/systemc-3.0.0/include/**",
-                "/usr/share/verilator/include"
+                "/root/Documents/systemc-3.0.0/include/**",
+                "/root/Documents/verilator/include/**"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/g++",

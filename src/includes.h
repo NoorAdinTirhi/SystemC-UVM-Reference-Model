@@ -29,24 +29,38 @@ using namespace std;
 
 typedef struct messageFromReporter
 {
-    long mesg_type;
-    int x;
-    char compressed_out[COMPRESSED_IN_WIDTH+1];
-    char decompressed_out[81];
-    char response[3];
-    char command[3];
-    char data_in[81];
-    char compressed_in[COMPRESSED_IN_WIDTH+1];
-    bool reset;
+    long mesg_type;     
+    unsigned char compressed_out;       // 8 bit
+    unsigned char decompressed_out[10]; // 80 bit
+    unsigned char response;             // 2 bit
+    unsigned char command;              // 2 bit
+    unsigned char data_in[10];          // 80 bit
+    unsigned char compressed_in;        // 8 bit
+    bool reset;                         // 1 bit
     
 }messageFromReporter;
 
 
 typedef struct messageToDriver{
     long mesg_type;
-    char command[3];
-    char data_in[81];
-    char compressed_in[COMPRESSED_IN_WIDTH+1];
-    bool reset;
+    unsigned char command;              // 2 bit
+    unsigned char data_in[10];          // 80 bit
+    unsigned char compressed_in;        // 8 bit
+    bool reset;                         // 1 bit
     
 } messageToDriver;
+
+// typedef char unsigned byte_arr_t [9:0];
+
+messageToDriver dMessage;
+
+messageFromReporter rMessage;
+
+
+// char getReset(){
+//     return dMessage.reset;
+// }
+
+// char getCommand(){
+//     return dMessage.command[0];
+// }

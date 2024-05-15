@@ -46,7 +46,6 @@ SC_MODULE(Compressor){
     //index buffer
 
     int index_buffer;
-    
 
 
     
@@ -55,12 +54,11 @@ SC_MODULE(Compressor){
         SC_THREAD(Behavior);
     }
 
+
     void Behavior(){
-
-        std::cout<< "Compressor Started" << std::endl;
-
         //hash table, maps compressed bits to data bits
         std::vector<sc_dt::sc_lv<80>> table (std::pow(2, COMPRESSED_IN_WIDTH));
+
 
         for(int i = 0; i < std::pow(2, COMPRESSED_IN_WIDTH); i++){
                 table[i] = sc_dt::sc_lv<80>(nZeroString(80).c_str());
@@ -80,10 +78,10 @@ SC_MODULE(Compressor){
         
         response->write("00");
 
+
         // always loop equivelant, similar to behavioral programming
         while (true) {
             wait(clk->posedge_event());
-            wait(SC_ZERO_TIME);
             if (reset->read()){
                 //RESET
                 for(int i = 0; i < std::pow(2, COMPRESSED_IN_WIDTH); i++){
@@ -97,21 +95,18 @@ SC_MODULE(Compressor){
 
             if(index_buffer >= std::pow(2, COMPRESSED_IN_WIDTH) - 1){
                 //ERROR
-                std::cout << "ERROR : MEMORY FULL" << std::endl<< std::endl;
                 response->write("11");
                 continue;
             }
 
             if (command->read() == sc_dt::sc_lv<2>("11")){
                 //ERROR
-                std::cout << "ERROR : COMMAND is 11" << std::endl<< std::endl;
                 response->write("11");
                 continue;
             }
 
             if(command->read() == sc_dt::sc_lv<2>("00")){
                 //NO OPERATION
-                std::cout << "NO OPERATION" << std::endl<< std::endl;
                 response->write("00");
                 continue;
             }
@@ -119,19 +114,15 @@ SC_MODULE(Compressor){
 
             if (command->read() == sc_dt::sc_lv<2>("10")){
                 //DECOMPRESSION
-                std::cout << "DECOMPRESSION : ";
                 
                 //check if input is already registered
                 if (compressed_in->read().to_int() <= index_buffer ){
 
                     // VALID DECOMPRESSION
-                    std::cout << "VALID" << std::endl<< std::endl;
                     decompressed_out -> write(table[compressed_in->read().to_int()]);
-                    response -> write("01");
+                    response -> write("10");
 
                 }else{
-
-                    std::cout << "ERROR : " << compressed_in->read().to_int() << " > " << index_buffer << std::endl << std::endl;
                     response -> write("11");
 
                 }
@@ -139,23 +130,17 @@ SC_MODULE(Compressor){
                 
             else if (command->read() == sc_dt::sc_lv<2>("01")){
                 //COMPRESSION
-                std::cout << "COMPRESSION VALID ";
-
-                response -> write("10");
+                response -> write("01");
 
                 search_flag = false;
                 for(int i = 0; i <= index_buffer; i++){
                     if (table[i] == data_in->read()){
-
-                        std::cout << " FOUND :  " << search_flag << " on iteration : " << i << std::endl;
-                        std::cout << "INDEX BUFFER : " << index_buffer << std::endl << std::endl;
                         temp = i;
 
                     }else{
 
                         table[index_buffer] = ( data_in->read());
                         temp = index_buffer++;
-                        std::cout << "TABLE ENTRY NUMBER : " << temp << " : " << data_in->read() << std::endl << std::endl;
 
                     }
             
@@ -171,6 +156,9 @@ SC_MODULE(Compressor){
 // this is where the 3 modules' ports are connected
 // Driver->Compressor->Reporter
 int sc_main(int, char *[]){
+
+    sc_report_handler::set_actions(SC_ID_VECTOR_CONTAINS_LOGIC_VALUE_,
+                                   SC_DO_NOTHING);
 
     //initialize random seed
     int seed = time(NULL);
@@ -223,7 +211,7 @@ int sc_main(int, char *[]){
     R1.compressed_in(compressed_in);
     R1.compressed_out(compressed_out);
 
-    sc_start(100, SC_NS);
+    sc_start(INT_MAX, SC_NS);
 
     return 0;
 }

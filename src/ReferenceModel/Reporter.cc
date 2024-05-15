@@ -49,44 +49,27 @@ SC_MODULE(Reporter) {
             wait(SC_ZERO_TIME);
 
             rMessage.reset = reset->read();
+            rMessage.command = command->read().to_uint();
+            rMessage.compressed_in = compressed_in->read().to_uint();
+            rMessage.compressed_out = compressed_out->read().to_uint();
+            rMessage.response = response->read().to_uint();
+            for (int i = 0; i < 10; i++)
+                    rMessage.data_in[i] = data_in->read().range(7+i*8, i*8).to_int();
+            for (int i = 0; i < 10; i++)
+                    rMessage.decompressed_out[i] = decompressed_out->read().range(7+i*8, i*8).to_int();
 
-            strncpy(rMessage.compressed_out, compressed_out->read().to_string().c_str(), COMPRESSED_IN_WIDTH);
-            strncpy(rMessage.decompressed_out, decompressed_out->read().to_string().c_str(), 80);
-            strncpy(rMessage.command, command->read().to_string().c_str(), 2);
-            strncpy(rMessage.compressed_in, compressed_in->read().to_string().c_str(), COMPRESSED_IN_WIDTH);
-            strncpy(rMessage.response, response->read().to_string().c_str(), 2);
-            strncpy (rMessage.data_in, data_in->read().to_string().c_str(), 80);
-
-            /*std::cout << "Time : " << sc_time_stamp() << std::endl\
-                << "reset  : ";
+            // cout << "command : " << static_cast<unsigned>(rMessage.command) << endl;
+            // cout << "compressed in : "<< static_cast<unsigned>(rMessage.compressed_in) << endl;
+            // cout << "compressed out : "<< static_cast<unsigned>(rMessage.compressed_out) << endl;
+            // cout << "response : " << static_cast<unsigned>(rMessage.response) << endl;
             
-            std::cout << reset -> read();
-
-            std::cout << std::endl << "command  : ";
-
-            std::cout <<  command -> read();
-
-            std::cout << std::endl << "data_in  : ";
-
-            std::cout << data_in -> read();
-            
-            std::cout << std::endl << "compressed_in  : ";
-
-            std::cout << compressed_in -> read();
-            
-            std::cout << std::endl << "compressed_out  : ";
-
-            std::cout << compressed_out -> read();
-
-            std::cout << std::endl << "decompressed_out  : ";
-
-            std::cout << decompressed_out->read();
-
-            std::cout << std::endl << "response  : ";
-
-            std::cout << response->read();
-
-            std::cout<< std::endl<< std::endl<< "####################################################" << std::endl<< std::endl;*/
+            // cout << "data_in : ";
+            // for (int i = 0; i < 10; i++)
+            //     cout <<  static_cast<unsigned>(rMessage.data_in[i]) << " ";
+            // cout << endl <<"decompressed_out : ";
+            // for (int i = 0; i < 10; i++)
+            //     cout << static_cast<unsigned>(rMessage.decompressed_out[i]) << " ";
+            // cout << endl;
 
             if (msgsnd(messageQueue, &rMessage, sizeof(rMessage), 0) == -1)
             {

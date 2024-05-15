@@ -5,17 +5,18 @@
 #include "includes.h"
 #include "Vtb_top.h"
 
-#define MAX_SIM_TIME 20
+
+
+#define MAX_SIM_TIME 50
 vluint64_t sim_time = 0;
 
 int main(int argc, char **argv, char **env)
 {
     Verilated::commandArgs(argc, argv);
 
-    messageFromReporter rMessage;
+
     rMessage.mesg_type = 1;
     
-    messageToDriver dMessage;
     dMessage.mesg_type = 1;
 
 
@@ -37,7 +38,7 @@ int main(int argc, char **argv, char **env)
 
     if (PID == 0){
         cout << "Starting Reference Model" << endl;
-        execl("./ReferenceModel/bin", NULL);
+        execl("src/ReferenceModel/bin", "bin", NULL);
 
     }else{
     
@@ -47,21 +48,21 @@ int main(int argc, char **argv, char **env)
         dut->trace(m_trace, 5);
         m_trace->open("waveform.vcd");
 
-        cout << "Simulation of ALU started" << endl;
-
         while (sim_time < MAX_SIM_TIME)
         {
             dut->clk ^= 1;
             dut->eval();
             m_trace->dump(sim_time);
 
+            // cout << "data_in : " << static_cast<unsigned>(dut->data_in.m_storage[2]) << endl;
+
             //read values from UVM and send to reference model
-            strncpy(dMessage.command, "01\0", 3);
-            strncpy(dMessage.data_in, "1101001110110001010001010011\0", 80);
-            strncpy(dMessage.compressed_in, "11010011\0", COMPRESSED_IN_WIDTH+1);
+            dMessage.command = static_cast<unsigned char>(dut->command);
+            memcpy(dMessage.data_in, dut->data_in.m_storage, 10*sizeof(char));
+            dMessage.compressed_in = static_cast<unsigned char>(dut->compressed_in);
             dMessage.reset = false;
 
-
+            // cout << "Compressed In: " << static_cast<unsigned>(dMessage.compressed_in) << endl;
 
             msgsnd(DmsgQ, &dMessage, sizeof(dMessage), 0);
 
@@ -69,15 +70,6 @@ int main(int argc, char **argv, char **env)
             msgrcv(RmsgQ, &rMessage, sizeof(rMessage), 1, 0);
 
             //TODO: send to UVM
-
-            // // print out rMessage results
-            // cout << "Compressed Out: " << rMessage.compressed_out << endl;
-            // cout << "Decompressed Out: " << rMessage.decompressed_out << endl;
-            // cout << "Response: " << rMessage.response << endl;
-            // cout << "Command: " << rMessage.command << endl;
-            // cout << "Data In: " << rMessage.data_in << endl;
-            // cout << "Compressed In: " << rMessage.compressed_in << endl;
-            // cout << "Reset: " << rMessage.reset << endl;
 
             sim_time++;
         }
