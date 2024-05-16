@@ -2,10 +2,10 @@
 #include <iostream>
 #include <verilated.h>
 #include <verilated_vcd_c.h>
-#include "includes.h"
 #include "Vtb_top.h"
+#include "Vtb_top__Dpi.h"
 
-
+#include "includes.h"
 
 #define MAX_SIM_TIME 50
 vluint64_t sim_time = 0;

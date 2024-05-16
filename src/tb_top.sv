@@ -19,15 +19,14 @@ module tb_top(input wire clk,
                output logic [1:0]  response
                );
 
-    typedef byte byte_arr_t[9:0];
     // import DPI-C function to get reference model;
-    // import "DPI-C" function byte getReset();
-    // import "DPI-C" function byte getCommand();
-    // import "DPI-C" function byte_arr_t getData_in();
-    // import "DPI-C" function byte getCompressed_in();
-    // import "DPI-C" function byte getCompressed_out();
-    // import "DPI-C" function byte_arr_t getDeCompressed_out();
-    // import "DPI-C" function byte getResponse();
+    import "DPI-C" function byte getReset();
+    import "DPI-C" function byte getCommand();
+    import "DPI-C" function int getWordData_in(int wi);
+    import "DPI-C" function byte getCompressed_in();
+    import "DPI-C" function byte getCompressed_out();
+    import "DPI-C" function int getWordDecompressed_out(int wi);
+    import "DPI-C" function byte getResponse();
 
     comp_if #(8) cd1_if();
 
@@ -42,11 +41,26 @@ module tb_top(input wire clk,
         .response (cd1_if.response)
     );
 
-    always @(posedge clk) begin
+    initial begin
         command = 2'b01;
         compressed_in = 8'b11110000;
-        data_in = 80'b000000000000000000000000001101010000000000000000000000000010011000000000000000000000000000100101;
-        
+        data_in = 80'b000000000000000000000000001101010000000000000000000000000010011000000000000000000000000000100101;   
+    end
+    //TODO: fix getWordData_in in include file
+    //TODO: fix getWordDecompressed_out in include file
+    always @(posedge clk) begin
+        $display("reset : ", getReset());
+        $display("command : ", getCommand());
+        // $display("data_in[0] : ", getWordData_in(0));
+        // $display("data_in[1] : ", getWordData_in(1));
+        // $display("data_in[2] : ", getWordData_in(2));
+        $display("compressed_in : ", getCompressed_in());
+        $display("compressed_out : ", getCompressed_out());
+        // $display("decompressed_out[0] : ", getWordDecompressed_out(0));
+        // $display("decompressed_out[1] : ", getWordDecompressed_out(1));
+        // $display("decompressed_out[2] : ", getWordDecompressed_out(2));
+        $display("response : ", getResponse());
+        $display("---------------------------------------------------");
     end
 
 

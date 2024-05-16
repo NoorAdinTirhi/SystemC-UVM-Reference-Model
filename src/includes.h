@@ -57,10 +57,47 @@ messageToDriver dMessage;
 messageFromReporter rMessage;
 
 
-// char getReset(){
-//     return dMessage.reset;
-// }
+char getReset()
+{
+    return rMessage.reset;
+}
 
-// char getCommand(){
-//     return dMessage.command[0];
-// }
+char getCommand()
+{
+    return rMessage.command;
+}
+
+char getCompressed_in()
+{
+    return rMessage.compressed_in;
+}
+char getCompressed_out()
+{
+    return rMessage.compressed_out;
+}
+
+char getResponse(){
+    return rMessage.response;
+}
+
+// TODO: fix getWordData_in in include file
+// TODO: fix getWordDecompressed_out in include file
+int getWordData_in(int wi)
+{
+    int answer;
+    for (int i = 4*i; (i < 4*i+4) && i < 10; i++)
+    {
+        memcpy(&answer + i, rMessage.data_in+i, 1);
+    }
+    return answer;
+}
+
+int getWordDecompressed_out(int wi)
+{
+    int answer;
+    for (int i = 4*i; (i < 4*i+4) && i < 10; i++)
+    {
+        memcpy(&answer + i, rMessage.decompressed_out+i, 1);
+    }
+    return answer;
+}
