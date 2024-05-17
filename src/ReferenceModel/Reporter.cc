@@ -73,7 +73,7 @@ SC_MODULE(Reporter) {
 
             if (msgsnd(messageQueue, &rMessage, sizeof(rMessage), 0) == -1)
             {
-                perror("person painter send :");
+                perror("reporter send message: error");
                 exit(1);
             };
         }

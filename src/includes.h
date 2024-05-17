@@ -84,20 +84,20 @@ char getResponse(){
 // TODO: fix getWordDecompressed_out in include file
 int getWordData_in(int wi)
 {
-    int answer;
-    for (int i = 4*i; (i < 4*i+4) && i < 10; i++)
-    {
-        memcpy(&answer + i, rMessage.data_in+i, 1);
-    }
+    int answer = 0;
+    if (wi <= 1)
+        memcpy(&answer , &rMessage.data_in[wi*4], 4);
+    else if (wi == 2)
+        memcpy(&answer , &rMessage.data_in[wi*4], 2);
     return answer;
 }
 
 int getWordDecompressed_out(int wi)
 {
-    int answer;
-    for (int i = 4*i; (i < 4*i+4) && i < 10; i++)
-    {
-        memcpy(&answer + i, rMessage.decompressed_out+i, 1);
-    }
+    int answer = 0;
+    if (wi <= 1)
+        memcpy(&answer, &rMessage.decompressed_out[wi * 4], 4);
+    else if (wi == 2)
+        memcpy(&answer, &rMessage.decompressed_out[wi * 4], 2);
     return answer;
 }
