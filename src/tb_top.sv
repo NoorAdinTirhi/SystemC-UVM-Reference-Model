@@ -32,7 +32,7 @@ module tb_top(input wire clk,
     function logic_arr_t getData_in();
         logic_arr_t data;
         for (int i = 0; i < 80; i++) begin
-            data[i] = getWordData_in(i/32);
+            data[i] = getWordData_in(i/32)[i%32];
         end
         return data;
     endfunction
@@ -40,7 +40,7 @@ module tb_top(input wire clk,
     function logic_arr_t getDecompressed_out();
         logic_arr_t data;
         for (int i = 0; i < 80; i++) begin
-            data[i] = getWordDecompressed_out(i/32);
+            data[i] = getWordDecompressed_out(i/32)[i%32];
         end
         return data;
     endfunction
@@ -62,7 +62,7 @@ module tb_top(input wire clk,
     initial begin
         command = 2'b01;
         compressed_in = 8'b11110000;
-        data_in = 80'b1000000000000000000000000011010100000000000001001100000000000000000000000001011;   
+        data_in = 80'b11111111111111111111111111111111111111111111111111111111111111111111111111111111;   
     end
     //TODO: fix getWordData_in in include file
     //TODO: fix getWordDecompressed_out in include file
