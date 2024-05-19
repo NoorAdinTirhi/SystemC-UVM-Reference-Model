@@ -2,6 +2,8 @@
 
 // import uvm_pkg::*;
 
+`include "components/packet.sv"
+
 `include "components/compression_decompression_interface.sv"
 
 `include "design/compression_decompression.sv"
@@ -19,31 +21,7 @@ module tb_top(input wire clk,
                output logic [1:0]  response
                );
 
-    typedef logic[79:0] logic_arr_t;
-    // import DPI-C function to get reference model;
-    import "DPI-C" function byte getReset();
-    import "DPI-C" function byte getCommand();
-    import "DPI-C" function int getWordData_in(int wi);
-    import "DPI-C" function byte getCompressed_in();
-    import "DPI-C" function byte getCompressed_out();
-    import "DPI-C" function int getWordDecompressed_out(int wi);
-    import "DPI-C" function byte getResponse();
-
-    function logic_arr_t getData_in();
-        logic_arr_t data;
-        for (int i = 0; i < 80; i++) begin
-            data[i] = getWordData_in(i/32)[i%32];
-        end
-        return data;
-    endfunction
-
-    function logic_arr_t getDecompressed_out();
-        logic_arr_t data;
-        for (int i = 0; i < 80; i++) begin
-            data[i] = getWordDecompressed_out(i/32)[i%32];
-        end
-        return data;
-    endfunction
+    `include "components/DPICommunication.sv"
     
 
     comp_if #(8) cd1_if();
@@ -59,26 +37,25 @@ module tb_top(input wire clk,
         .response (cd1_if.response)
     );
 
-    initial begin
-        command = 2'b01;
-        compressed_in = 8'b11110000;
-        data_in = 80'b11111111111111111111111111111111111111111111111111111111111111111111111111111111;   
-    end
-    //TODO: fix getWordData_in in include file
-    //TODO: fix getWordDecompressed_out in include file
+    //assign all interface signals to the top module outputs
+    assign reset = cd1_if.reset;
+    assign command = cd1_if.command;
+    assign data_in = cd1_if.data_in;
+    assign compressed_in = cd1_if.compressed_in;
+    assign compressed_out = cd1_if.compressed_out;
+    assign decompressed_out = cd1_if.decompressed_out;
+    assign response = cd1_if.response;
+
     always @(posedge clk) begin
-        $display("reset : ", getReset());
-        $display("command : ", getCommand());
-        $display("data_in : ", getData_in());
-        $display("compressed_in : ", getCompressed_in());
-        $display("compressed_out : ", getCompressed_out());
-        $display("decompressed_out : ", getDecompressed_out());
-        $display("response : ", getResponse());
+        $display("reset : 0b%0b", getReset());
+        $display("command : 0b%0b", getCommand());
+        $display("data_in : 0x%0h", getData_in());
+        $display("compressed_in : 0b%0b", getCompressed_in());
+        $display("compressed_out : 0b%0b", getCompressed_out());
+        $display("decompressed_out : 0x%0h", getDecompressed_out());
+        $display("response : 0b%0b", getResponse());
         $display("---------------------------------------------------");
     end
-
-
-    
 
     // initial begin
     //     uvm_config_db#(virtual comp_if #(8))::set(null, "uvm_test_top", "cd1_if", cd1_if);

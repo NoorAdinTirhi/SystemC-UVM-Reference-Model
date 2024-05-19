@@ -80,8 +80,6 @@ char getResponse(){
     return rMessage.response;
 }
 
-// TODO: fix getWordData_in in include file
-// TODO: fix getWordDecompressed_out in include file
 int getWordData_in(int wi)
 {
     int answer = 0;
