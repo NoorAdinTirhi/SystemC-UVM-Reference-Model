@@ -5,6 +5,8 @@
 #include "Vtb_top.h"
 #include "Vtb_top__Dpi.h"
 
+bool valid = false;
+
 #include "includes.h"
 
 #define MAX_SIM_TIME 50
@@ -53,16 +55,11 @@ int main(int argc, char **argv, char **env)
             dut->clk ^= 1;
             dut->eval();
             m_trace->dump(sim_time);
-
-            // cout << "data_in : " << static_cast<unsigned>(dut->data_in.m_storage[2]) << endl;
-
             //read values from UVM and send to reference model
             dMessage.command = static_cast<unsigned char>(dut->command);
             memcpy(dMessage.data_in, dut->data_in.m_storage, 10*sizeof(char));
             dMessage.compressed_in = static_cast<unsigned char>(dut->compressed_in);
             dMessage.reset = false;
-
-            // cout << "Compressed In: " << static_cast<unsigned>(dMessage.compressed_in) << endl;
 
             msgsnd(DmsgQ, &dMessage, sizeof(dMessage), 0);
 
@@ -86,3 +83,5 @@ int main(int argc, char **argv, char **env)
         exit(EXIT_SUCCESS);   
     }
 }
+
+

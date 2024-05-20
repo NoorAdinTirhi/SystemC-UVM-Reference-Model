@@ -1,6 +1,6 @@
-// `include "uvm_pkg.sv"
+`include "uvm_pkg.sv"
 
-// import uvm_pkg::*;
+import uvm_pkg::*;
 
 `include "components/packet.sv"
 
@@ -24,7 +24,7 @@ module tb_top(input wire clk,
     `include "components/DPICommunication.sv"
     
 
-    comp_if #(8) cd1_if();
+    comp_if #(8) cd1_if(clk);
 
     compression_decompression cd1 (
         .clk (clk),
@@ -57,10 +57,10 @@ module tb_top(input wire clk,
         $display("---------------------------------------------------");
     end
 
-    // initial begin
-    //     uvm_config_db#(virtual comp_if #(8))::set(null, "uvm_test_top", "cd1_if", cd1_if);
-    //     `uvm_info("tb_top", "Interface Registered", UVM_NONE)
-    // end
+    initial begin
+        uvm_config_db#(virtual comp_if #(8))::set(null, "uvm_test_top", "cd1_if", cd1_if);
+        `uvm_info("tb_top", "Interface Registered", UVM_NONE)
+    end
 
 
 
