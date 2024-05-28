@@ -135,17 +135,14 @@ SC_MODULE(Compressor){
                 search_flag = false;
                 for(int i = 0; i <= index_buffer; i++){
                     if (table[i] == data_in->read()){
-                        temp = i;
-
-                    }else{
-
-                        table[index_buffer] = ( data_in->read());
-                        temp = index_buffer++;
-
+                        compressed_out->write(i);
+                        search_flag = true;
+                        break;
                     }
-            
-                    compressed_out->write(temp);
-                    break;   
+                }
+                if (!search_flag){
+                    table[++index_buffer] = (data_in->read());
+                    compressed_out->write(index_buffer);
                 }
             }
         }
