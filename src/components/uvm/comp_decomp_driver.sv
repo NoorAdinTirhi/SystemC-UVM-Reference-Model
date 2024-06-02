@@ -11,25 +11,25 @@ class comp_decomp_driver extends uvm_driver#(comp_decomp_seq_item);
 
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
-        if(!uvm_config_db#(comp_if)::get(this, "", "vif", vif))
+        if(!uvm_config_db#(virtual comp_if)::get(this, "", "vif", vif))
             `uvm_fatal("NOVIF", {"Virtual interface must be set for: ", get_full_name()})
     endfunction
 
     virtual task run_phase(uvm_phase phase);
         forever begin
-            seq_item_port.get_next_item(packet);
+            seq_item_port.get_next_item(req);
             drive();
             seq_item_port.item_done();
-        end\
+        end
     endtask: run_phase
 
 
     virtual task drive();
         @(posedge vif.clk);
-        vif.data_in = packet.data_in;
-        vif.compressed_in = packet.data_in;
-        vif.reset = packet.reset;
-        vif.command = packet.command;
+        vif.data_in = {req.data_in_hi, req.data_in_lo};
+        vif.compressed_in = req.compressed_in;
+        vif.reset = req.reset;
+        vif.command = req.command;
     endtask
         
 endclass

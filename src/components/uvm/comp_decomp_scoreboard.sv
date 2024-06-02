@@ -17,7 +17,7 @@ class comp_decomp_scoreboard extends uvm_scoreboard;
 
     virtual function void write(comp_decomp_seq_item pkt);
         pkt.print();
-        pkt_qu.push_back(pkt);
+        packet_queue.push_back(pkt);
     endfunction : write
 
     virtual task run_phase(uvm_phase phase);
@@ -28,30 +28,30 @@ class comp_decomp_scoreboard extends uvm_scoreboard;
 
             if (pkt.command == 2'b00)begin
                 `uvm_info(get_type_name(),$sformatf("------ :: NOP      :: ------"),UVM_LOW);
-                if (pkt.response != getResponse()) begin
+                if (pkt.response != $root.tb_top.com.getResponse()) begin
                     `uvm_warning(get_type_name, $sformatf("INCORRECT RESPONSE:  0b%0b, EXCPECTED 0b00", pkt.response))
                 end
 
             end else if (pkt.command == 2'b01) begin
                 `uvm_info(get_type_name(),$sformatf("------ ::  COMPRESSION  :: ------"),UVM_LOW);
-                if (pkt.response != getResponse()) begin
+                if (pkt.response != $root.tb_top.com.getResponse()) begin
                     `uvm_warning(get_type_name, $sformatf("INCORRECT RESPONSE:  0b%0b, EXCPECTED 0b01", pkt.response))
                 end
-                if (pkt.compressed_out != getCompressed_out()) begin
-                    `uvm_warning(get_type_name, $sformatf("INCORRECT COMPRESSION: 0b%0b, EXCPECTED 0b%0b", pkt.compressed_out, getCompressed_out()))
+                if (pkt.compressed_out != $root.tb_top.com.getCompressed_out()) begin
+                    `uvm_warning(get_type_name, $sformatf("INCORRECT COMPRESSION: 0b%0b, EXCPECTED 0b%0b", pkt.compressed_out, $root.tb_top.com.getCompressed_out()))
                 end
 
             end else if (pkt.command == 2'b10) begin
                 `uvm_info(get_type_name(),$sformatf("------ :: DECOMPRESSION :: ------"),UVM_LOW);
-                if (pkt.response != getResponse()) begin
+                if (pkt.response != $root.tb_top.com.getResponse()) begin
                     `uvm_warning(get_type_name, $sformatf("INCORRECT RESPONSE:  0b%0b, EXCPECTED 0b10", pkt.response))
                 end
-                if (pkt.decompressed_out != getDecompressed_out()) begin
-                    `uvm_warning(get_type_name, $sformatf("INCORRECT COMPRESSION:  0x%0h, EXCPECTED 0x%0h", pkt.decompressed_out, getDecompressed_out()))
+                if (pkt.decompressed_out_lo != $root.tb_top.com.getDecompressed_out()[63:0] || pkt.decompressed_out_hi != $root.tb_top.com.getDecompressed_out()[79:64]) begin
+                    `uvm_warning(get_type_name, $sformatf("INCORRECT COMPRESSION:  0x%0h, EXCPECTED 0x%0h", { pkt.decompressed_out_hi,pkt.decompressed_out_lo}, $root.tb_top.com.getDecompressed_out()))
                 end
 
             end else if (pkt.command == 2'b11) begin
-                if (pkt.response != getResponse()) begin
+                if (pkt.response != $root.tb_top.com.getResponse()) begin
                     `uvm_warning(get_type_name, $sformatf("INCORRECT RESPONSE:  0b%0b, EXCPECTED 0b11", pkt.response))
                 end
             end

@@ -2,6 +2,8 @@ SIM_NAME ?= tb_top
 # COMPILE_ARGS += -DUVM_NO_DPI
 # COMPILE_ARGS += --prefix $(SIM_NAME) -o $(SIM_NAME)
 # COMPILE_ARGS += $(addprefix +incdir+, $(VERILOG_INCLUDE_DIRS))
+UVM_TEST ?= comp_decomp_test
+
 EXTRA_ARGS += --timescale 1ns/1ps --error-limit 100
 WARNING_ARGS += -Wno-lint \
 	-Wno-style \
@@ -34,7 +36,7 @@ clean :
 	make -C src/ReferenceModel clean
 
 run : obj_dir/Vtb_top src/ReferenceModel/bin
-	obj_dir/Vtb_top
+	obj_dir/Vtb_top +UVM_TESTNAME=$(UVM_TEST)
 
 src/ReferenceModel/bin :
 	make -C src/ReferenceModel bin

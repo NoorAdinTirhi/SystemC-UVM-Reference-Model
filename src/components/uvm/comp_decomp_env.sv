@@ -1,10 +1,12 @@
-`include "comp_decomp_agent.sv"
-`include "comp_decomp_scoreboard.sv"
+`include "components/uvm/comp_decomp_agent.sv"
+`include "components/uvm/comp_decomp_scoreboard.sv"
 
 class comp_decomp_env extends uvm_env;
 
     comp_decomp_agent agent;
     comp_decomp_scoreboard scb;
+
+    `uvm_component_utils(comp_decomp_env)
 
     function new(string name, uvm_component parent);
         super.new(name, parent);
@@ -12,7 +14,6 @@ class comp_decomp_env extends uvm_env;
 
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
-        
         agent = comp_decomp_agent::type_id::create("agent", this);
         scb = comp_decomp_scoreboard::type_id::create("scb", this);
     endfunction

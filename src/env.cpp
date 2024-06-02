@@ -9,7 +9,7 @@ bool valid = false;
 
 #include "includes.h"
 
-#define MAX_SIM_TIME 50
+#define MAX_SIM_TIME 1000
 vluint64_t sim_time = 0;
 
 int main(int argc, char **argv, char **env)

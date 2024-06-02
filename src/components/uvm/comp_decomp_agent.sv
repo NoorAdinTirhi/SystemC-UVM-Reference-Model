@@ -1,7 +1,7 @@
-`include "comp_decomp_seq_item.sv"
-`include "comp_decomp_sequencer.sv"
-`include "comp_decomp_driver.sv"
-`include "comp_decomp_monitor.sv"
+`include "components/uvm/comp_decomp_seq_item.sv"
+`include "components/uvm/comp_decomp_sequencer.sv"
+`include "components/uvm/comp_decomp_driver.sv"
+`include "components/uvm/comp_decomp_monitor.sv"
 
 class comp_decomp_agent extends uvm_agent;
     
@@ -16,7 +16,7 @@ class comp_decomp_agent extends uvm_agent;
     endfunction: new
 
     function void build_phase(uvm_phase phase);
-        super.build_phase;
+        super.build_phase(phase);
 
         monitor = comp_decomp_monitor::type_id::create("monitor", this);
         driver = comp_decomp_driver::type_id::create("driver", this);

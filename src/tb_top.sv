@@ -1,8 +1,10 @@
+`include "components/DPICommunication.sv"
+
 `include "uvm_pkg.sv"
 
 import uvm_pkg::*;
 
-`include "components/packet.sv"
+`include "components/uvm/comp_decomp_test.sv"
 
 `include "components/compression_decompression_interface.sv"
 
@@ -21,10 +23,12 @@ module tb_top(input wire clk,
                output logic [1:0]  response
                );
 
-    `include "components/DPICommunication.sv"
+    
     
 
     comp_if #(8) cd1_if(clk);
+
+    comp_decomp_test t1;
 
     compression_decompression cd1 (
         .clk (clk),
@@ -46,21 +50,34 @@ module tb_top(input wire clk,
     assign decompressed_out = cd1_if.decompressed_out;
     assign response = cd1_if.response;
 
-    always @(posedge clk) begin
-        $display("reset : 0b%0b", getReset());
-        $display("command : 0b%0b", getCommand());
-        $display("data_in : 0x%0h", getData_in());
-        $display("compressed_in : 0b%0b", getCompressed_in());
-        $display("compressed_out : 0b%0b", getCompressed_out());
-        $display("decompressed_out : 0x%0h", getDecompressed_out());
-        $display("response : 0b%0b", getResponse());
-        $display("---------------------------------------------------");
+    // always @(posedge clk) begin
+    //     $display("reset : 0b%0b", $root.tb_top.com.getReset());
+    //     $display("reset : 0b%0b", reset);
+    //     $display("command : 0b%0b", com.getCommand());
+    //     $display("command : 0b%0b", command);
+    //     $display("data_in : 0x%0h", com.getData_in());
+    //     $display("data_in : 0x%0h", data_in);
+    //     $display("compressed_in : 0b%0b", com.getCompressed_in());
+    //     $display("compressed_in : 0b%0b", compressed_in);
+    //     $display("compressed_out : 0b%0b", com.getCompressed_out());
+    //     $display("compressed_out : 0b%0b", compressed_out);
+    //     $display("decompressed_out : 0x%0h", com.getDecompressed_out());
+    //     $display("decompressed_out : 0x%0h", decompressed_out);
+    //     $display("response : 0b%0b", com.getResponse());
+    //     $display("response : 0b%0b", response);
+    //     $display("---------------------------------------------------");
+    // end
+
+    initial begin
+        uvm_config_db#(virtual comp_if #(8))::set(uvm_root::get(), "uvm_test_top", "cd1_if", cd1_if);
+        `uvm_info("tb_top", "Interface Registered", UVM_NONE)
     end
 
     initial begin
-        uvm_config_db#(virtual comp_if #(8))::set(null, "uvm_test_top", "cd1_if", cd1_if);
-        `uvm_info("tb_top", "Interface Registered", UVM_NONE)
+        run_test("comp_decomp_test");
     end
+
+    dpiConmunicator com();
 
 
 
