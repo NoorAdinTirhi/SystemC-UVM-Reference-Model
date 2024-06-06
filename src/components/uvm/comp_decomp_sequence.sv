@@ -3,7 +3,6 @@ class comp_decomp_sequence extends uvm_sequence#(comp_decomp_seq_item);
     `uvm_object_utils(comp_decomp_sequence)
 
     function new(string name = "comp_decomp_sequence");
-        `uvm_info(get_type_name(), "Constructor", UVM_NONE)
         super.new(name);
     endfunction
 
@@ -12,10 +11,10 @@ class comp_decomp_sequence extends uvm_sequence#(comp_decomp_seq_item);
     virtual task body();
         repeat(10) begin
             comp_decomp_seq_item item;
-            packet = comp_decomp_seq_item::type_id::create("packet");
+            req = comp_decomp_seq_item::type_id::create("req");
             wait_for_grant();
-            packet.randomize();
-            send_request(packet);
+            req.randomize();
+            send_request(req);
             wait_for_item_done();
         end
     endtask

@@ -54,7 +54,7 @@ int main(int argc, char **argv, char **env)
         m_trace->dump(sim_time);
         sim_time++;
 
-        while (sim_time < MAX_SIM_TIME)
+        while (!Verilated::gotFinish());
         {
             dut->clk ^= 1;
             dut->eval();

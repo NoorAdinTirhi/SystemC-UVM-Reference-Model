@@ -1,5 +1,5 @@
 
-
+//module used to communicate with the systemC reference model through the cpp warpper
 module dpiConmunicator;
     typedef logic[79:0] logic_arr_t;
 
