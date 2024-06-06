@@ -7,14 +7,19 @@ class comp_decomp_test extends uvm_test;
     comp_decomp_env env;
 
 
-    function new (string name = "comp_decomp_test", uvm_component parent=null);
-        super.new(name,parent);
-    endfunction
+    
 
     virtual function void build_phase(uvm_phase phase);
+        `uvm_info(get_type_name(), "build_phase", UVM_NONE)
         super.build_phase(phase);
         env = comp_decomp_env::type_id::create("env", this);
     endfunction : build_phase
+
+    function new (string name = "comp_decomp_test", uvm_component parent);
+        super.new(name,parent);
+        `uvm_info(get_type_name(), "Constructor", UVM_NONE)
+        build_phase(uvm_build_phase::get());
+    endfunction
 
     virtual function void end_of_elaboration_phase(uvm_phase phase);
         print();

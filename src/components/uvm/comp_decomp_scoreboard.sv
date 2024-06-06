@@ -7,12 +7,16 @@ class comp_decomp_scoreboard extends uvm_scoreboard;
     `uvm_component_utils(comp_decomp_scoreboard);
 
     function new (string name, uvm_component parent);
+        `uvm_info(get_type_name(), "Constructor", UVM_NONE)
         super.new(name, parent);
+        build_phase(uvm_build_phase::get());
     endfunction
 
     function void build_phase(uvm_phase phase);
+        `uvm_info(get_type_name(), "Build_phase", UVM_NONE)
         super.build_phase(phase);
         item_collected_export = new("item_collected_export", this);
+        run_phase(uvm_connect_phase::get());
     endfunction
 
     virtual function void write(comp_decomp_seq_item pkt);

@@ -3,6 +3,7 @@ class comp_decomp_sequence extends uvm_sequence#(comp_decomp_seq_item);
     `uvm_object_utils(comp_decomp_sequence)
 
     function new(string name = "comp_decomp_sequence");
+        `uvm_info(get_type_name(), "Constructor", UVM_NONE)
         super.new(name);
     endfunction
 

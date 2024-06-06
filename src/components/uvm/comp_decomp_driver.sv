@@ -6,16 +6,19 @@ class comp_decomp_driver extends uvm_driver#(comp_decomp_seq_item);
     `uvm_component_utils(comp_decomp_driver)
 
     function new(string name, uvm_component parent);
+        `uvm_info(get_type_name(), "Constructor", UVM_NONE)
         super.new(name, parent);
     endfunction //new()
 
     function void build_phase(uvm_phase phase);
+        `uvm_info(get_type_name(), "Build_phase", UVM_NONE)
         super.build_phase(phase);
         if(!uvm_config_db#(virtual comp_if)::get(this, "", "vif", vif))
             `uvm_fatal("NOVIF", {"Virtual interface must be set for: ", get_full_name()})
     endfunction
 
     virtual task run_phase(uvm_phase phase);
+        `uvm_info(get_type_name(), "run_phase", UVM_NONE)
         forever begin
             seq_item_port.get_next_item(req);
             drive();
