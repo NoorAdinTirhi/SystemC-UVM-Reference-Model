@@ -5,7 +5,6 @@
 #include "Vtb_top.h"
 #include "Vtb_top__Dpi.h"
 
-bool valid = false;
 
 #include "includes.h"
 
@@ -50,23 +49,29 @@ int main(int argc, char **argv, char **env)
         dut->trace(m_trace, 5);
         m_trace->open("waveform.vcd");
 
+        dut->clk = 0;
+        dut->eval();
+        m_trace->dump(sim_time);
+        sim_time++;
+
         while (sim_time < MAX_SIM_TIME)
         {
             dut->clk ^= 1;
             dut->eval();
             m_trace->dump(sim_time);
-            //read values from UVM and send to reference model
-            dMessage.command = static_cast<unsigned char>(dut->command);
-            memcpy(dMessage.data_in, dut->data_in.m_storage, 10*sizeof(char));
-            dMessage.compressed_in = static_cast<unsigned char>(dut->compressed_in);
-            dMessage.reset = false;
-
-            msgsnd(DmsgQ, &dMessage, sizeof(dMessage), 0);
-
-            //read values from reference model and send to UVM
-            msgrcv(RmsgQ, &rMessage, sizeof(rMessage), 1, 0);
-
-            //TODO: send to UVM
+            if (dut->clk == 1){
+                //read values from UVM
+                dMessage.command = static_cast<unsigned char>(dut->command);
+                memcpy(dMessage.data_in, dut->data_in.m_storage, 10*sizeof(char));
+                dMessage.compressed_in = static_cast<unsigned char>(dut->compressed_in);
+                dMessage.reset = dut->reset;
+    
+                //send to reference model
+                msgsnd(DmsgQ, &dMessage, sizeof(dMessage), 0);
+    
+                //read values from reference model, and put into buffer readable from SV/UVM
+                msgrcv(RmsgQ, &rMessage, sizeof(rMessage), 1, 0);
+            }
 
             sim_time++;
         }

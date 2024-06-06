@@ -36,8 +36,6 @@ SC_MODULE(Reporter) {
 
         int messageQueue = msgget(ipc_key, 0666 | IPC_CREAT);
 
-        std::cout << "Reporter sees : " << messageQueue << std::endl;
-
         if (messageQueue == -1)
         {
             perror("msgget");

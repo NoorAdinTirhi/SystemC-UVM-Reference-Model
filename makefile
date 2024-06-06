@@ -36,7 +36,7 @@ clean :
 	make -C src/ReferenceModel clean
 
 run : obj_dir/Vtb_top src/ReferenceModel/bin
-	obj_dir/Vtb_top +UVM_TESTNAME=$(UVM_TEST)
+	obj_dir/Vtb_top
 
 src/ReferenceModel/bin :
 	make -C src/ReferenceModel bin

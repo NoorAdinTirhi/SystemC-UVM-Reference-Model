@@ -32,8 +32,6 @@ SC_MODULE(Driver) {
 
         sc_dt::sc_lv<80> data_in_temp;
 
-        std::cout << "Driver sees : " << messageQueue << std::endl;
-
         if (messageQueue == -1){
             perror("msgget");
             exit(1);

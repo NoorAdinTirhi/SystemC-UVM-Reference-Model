@@ -56,7 +56,6 @@ messageToDriver dMessage;
 
 messageFromReporter rMessage;
 
-
 char getReset()
 {
     return rMessage.reset;
@@ -99,3 +98,4 @@ int getWordDecompressed_out(int wi)
         memcpy(&answer, &rMessage.decompressed_out[wi * 4], 2);
     return answer;
 }
+

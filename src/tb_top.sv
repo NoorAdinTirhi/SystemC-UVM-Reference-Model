@@ -22,13 +22,10 @@ module tb_top(input wire clk,
                output logic [79:0] decompressed_out,
                output logic [1:0]  response
                );
-
-    
-    
-
     comp_if #(8) cd1_if(clk);
 
-    comp_decomp_test t1;
+    dpiConmunicator com();
+    
 
     compression_decompression cd1 (
         .clk (clk),
@@ -50,23 +47,23 @@ module tb_top(input wire clk,
     assign decompressed_out = cd1_if.decompressed_out;
     assign response = cd1_if.response;
 
-    // always @(posedge clk) begin
-    //     $display("reset : 0b%0b", $root.tb_top.com.getReset());
-    //     $display("reset : 0b%0b", reset);
-    //     $display("command : 0b%0b", com.getCommand());
-    //     $display("command : 0b%0b", command);
-    //     $display("data_in : 0x%0h", com.getData_in());
-    //     $display("data_in : 0x%0h", data_in);
-    //     $display("compressed_in : 0b%0b", com.getCompressed_in());
-    //     $display("compressed_in : 0b%0b", compressed_in);
-    //     $display("compressed_out : 0b%0b", com.getCompressed_out());
-    //     $display("compressed_out : 0b%0b", compressed_out);
-    //     $display("decompressed_out : 0x%0h", com.getDecompressed_out());
-    //     $display("decompressed_out : 0x%0h", decompressed_out);
-    //     $display("response : 0b%0b", com.getResponse());
-    //     $display("response : 0b%0b", response);
-    //     $display("---------------------------------------------------");
-    // end
+    always @(negedge clk) begin
+        // $display("reset : 0b%0b", $root.tb_top.com.getReset());
+        // $display("reset : 0b%0b", reset);
+        // $display("command : 0b%0b", com.getCommand());
+        // $display("command : 0b%0b", command);
+        // $display("data_in : 0x%0h", com.getData_in());
+        // $display("data_in : 0x%0h", data_in);
+        // $display("compressed_in : 0b%0b", com.getCompressed_in());
+        // $display("compressed_in : 0b%0b", compressed_in);
+        // $display("compressed_out : 0b%0b", com.getCompressed_out());
+        // $display("compressed_out : 0b%0b", compressed_out);
+        // $display("decompressed_out : 0x%0h", com.getDecompressed_out());
+        // $display("decompressed_out : 0x%0h", decompressed_out);
+        // $display("response : 0b%0b", com.getResponse());
+        // $display("response : 0b%0b", response);
+        // $display("---------------------------------------------------");
+    end
 
     initial begin
         uvm_config_db#(virtual comp_if #(8))::set(uvm_root::get(), "uvm_test_top", "cd1_if", cd1_if);
@@ -74,11 +71,9 @@ module tb_top(input wire clk,
     end
 
     initial begin
+        `uvm_info("tb_top", "Starting test", UVM_NONE)
         run_test("comp_decomp_test");
     end
-
-    dpiConmunicator com();
-
 
 
 endmodule
