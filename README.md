@@ -28,7 +28,7 @@
 It is recommended to have these comamnds in your .bashrc file, this way you don't have to set all these variable each time you run the program.
 ## run command
 
-  simply run the following command from the command base directory
+  simply run the following command from the base directory
 
   ```
   $ make all
