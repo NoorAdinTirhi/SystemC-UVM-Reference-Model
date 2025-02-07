@@ -22,7 +22,7 @@
   ```
 It is recommended to have these comamnds in your .bashrc file, this way you don't have to set all these variable each time you run the program.
 
-##UVM
+## UVM
 after completing all previous steps, make sure to download a copy of UVM implementation and extract it.
 edit the make file to change the variable UVM_HOME at the top of the make file:
 ```
