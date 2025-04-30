@@ -1,3 +1,8 @@
+# Purpose of this project
+  SystemC is used alot by computer architects to write the spec for whatever design they have,
+  so it makes since to use it as a reference model, as far as I know there is no implementation for this right now, especially not an open-source one,
+  so this is to try and do this using Verilator.
+
 # Depencies
   you will need SystemC, verilator and build-essentials
 
