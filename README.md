@@ -41,4 +41,10 @@ edit the make file to change the variable UVM_HOME at the top of the make file:
   $ make all
   $ make run
   ```
-  
+
+# Repositery Current Status
+
+busy right now, probably won't update for a while.
+- could not get verilator to run UVM.
+- there's some trouble with interprocess communication.
+- make sure to clear message queues if you CTRL-C this while running (should probably change this to threads)
